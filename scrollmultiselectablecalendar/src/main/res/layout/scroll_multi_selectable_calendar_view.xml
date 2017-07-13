@@ -1,0 +1,71 @@
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:orientation="vertical">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal">
+
+            <TextView
+                android:id="@+id/dayOfWeek1"
+                style="@style/CalendarStyle.WeekStyle"
+                android:text="日"/>
+
+            <TextView
+                android:id="@+id/dayOfWeek2"
+                style="@style/CalendarStyle.WeekStyle"
+                android:text="月"/>
+
+            <TextView
+                android:id="@+id/dayOfWeek3"
+                style="@style/CalendarStyle.WeekStyle"
+                android:text="火"/>
+
+            <TextView
+                android:id="@+id/dayOfWeek4"
+                style="@style/CalendarStyle.WeekStyle"
+                android:text="水"/>
+
+            <TextView
+                android:id="@+id/dayOfWeek5"
+                style="@style/CalendarStyle.WeekStyle"
+                android:text="木"/>
+
+            <TextView
+                android:id="@+id/dayOfWeek6"
+                style="@style/CalendarStyle.WeekStyle"
+                android:text="金"/>
+
+            <TextView
+                android:id="@+id/dayOfWeek7"
+                style="@style/CalendarStyle.WeekStyle"
+                android:text="土"/>
+        </LinearLayout>
+
+        <ScrollView
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:orientation="vertical">
+
+                <include layout="@layout/inc_month" android:id="@+id/include_month_1"/>
+                <include layout="@layout/inc_month" android:id="@+id/include_month_2"/>
+                <include layout="@layout/inc_month" android:id="@+id/include_month_3"/>
+                <include layout="@layout/inc_month" android:id="@+id/include_month_4"/>
+                <include layout="@layout/inc_month" android:id="@+id/include_month_5"/>
+
+            </LinearLayout>
+        </ScrollView>
+    </LinearLayout>
+</FrameLayout>

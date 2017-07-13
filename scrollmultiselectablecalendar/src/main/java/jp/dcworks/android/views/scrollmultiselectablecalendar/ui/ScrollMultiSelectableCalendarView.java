@@ -1,12 +1,6 @@
 package jp.dcworks.android.views.scrollmultiselectablecalendar.ui;
 
 import android.content.Context;
-import android.content.res.TypedArray;
-import android.graphics.Canvas;
-import android.graphics.Color;
-import android.graphics.Paint;
-import android.graphics.drawable.Drawable;
-import android.text.TextPaint;
 import android.util.AttributeSet;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -18,6 +12,7 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout {
 
     public ScrollMultiSelectableCalendarView(Context context, AttributeSet attrs) {
         super(context, attrs);
-        View layout = LayoutInflater.from(context).inflate(R.layout.sample_my_view, this);
+        View layout = LayoutInflater.from(context).inflate(R.layout.scroll_multi_selectable_calendar_view, this);
     }
+
 }
