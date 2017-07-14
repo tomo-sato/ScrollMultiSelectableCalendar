@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="CalendarStyle">
+    <!-- CellのベースStyle -->
+    <style name="CalendarCellStyle">
         <item name="android:layout_width">0dp</item>
         <item name="android:layout_height">40dp</item>
         <item name="android:layout_weight">1.4</item>
@@ -8,12 +9,14 @@
         <item name="android:textColor">#000000</item>
     </style>
 
-    <style name="CalendarStyle.WeekStyle">
+    <!-- 週表示のStyle -->
+    <style name="CalendarCellStyle.WeekStyle">
         <item name="android:textSize">9dp</item>
         <item name="android:background">@drawable/border_bottom</item>
     </style>
 
-    <style name="CalendarStyle.DayStyle">
+    <!-- 日付表示のStyle -->
+    <style name="CalendarCellStyle.DayStyle">
         <item name="android:background">@drawable/border_top</item>
     </style>
 </resources>

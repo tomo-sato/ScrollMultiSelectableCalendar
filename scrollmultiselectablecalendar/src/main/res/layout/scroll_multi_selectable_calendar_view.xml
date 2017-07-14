@@ -16,37 +16,37 @@
 
             <TextView
                 android:id="@+id/dayOfWeek1"
-                style="@style/CalendarStyle.WeekStyle"
+                style="@style/CalendarCellStyle.WeekStyle"
                 android:text="日"/>
 
             <TextView
                 android:id="@+id/dayOfWeek2"
-                style="@style/CalendarStyle.WeekStyle"
+                style="@style/CalendarCellStyle.WeekStyle"
                 android:text="月"/>
 
             <TextView
                 android:id="@+id/dayOfWeek3"
-                style="@style/CalendarStyle.WeekStyle"
+                style="@style/CalendarCellStyle.WeekStyle"
                 android:text="火"/>
 
             <TextView
                 android:id="@+id/dayOfWeek4"
-                style="@style/CalendarStyle.WeekStyle"
+                style="@style/CalendarCellStyle.WeekStyle"
                 android:text="水"/>
 
             <TextView
                 android:id="@+id/dayOfWeek5"
-                style="@style/CalendarStyle.WeekStyle"
+                style="@style/CalendarCellStyle.WeekStyle"
                 android:text="木"/>
 
             <TextView
                 android:id="@+id/dayOfWeek6"
-                style="@style/CalendarStyle.WeekStyle"
+                style="@style/CalendarCellStyle.WeekStyle"
                 android:text="金"/>
 
             <TextView
                 android:id="@+id/dayOfWeek7"
-                style="@style/CalendarStyle.WeekStyle"
+                style="@style/CalendarCellStyle.WeekStyle"
                 android:text="土"/>
         </LinearLayout>
 

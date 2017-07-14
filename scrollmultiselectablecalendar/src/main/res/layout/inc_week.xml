@@ -8,30 +8,30 @@
 
     <TextView
         android:id="@+id/day1"
-        style="@style/CalendarStyle.DayStyle"
+        style="@style/CalendarCellStyle.DayStyle"
         android:text="1"/>
     <TextView
         android:id="@+id/day2"
-        style="@style/CalendarStyle.DayStyle"
+        style="@style/CalendarCellStyle.DayStyle"
         android:text="2"/>
     <TextView
         android:id="@+id/day3"
-        style="@style/CalendarStyle.DayStyle"
+        style="@style/CalendarCellStyle.DayStyle"
         android:text="3"/>
     <TextView
         android:id="@+id/day4"
-        style="@style/CalendarStyle.DayStyle"
+        style="@style/CalendarCellStyle.DayStyle"
         android:text="4"/>
     <TextView
         android:id="@+id/day5"
-        style="@style/CalendarStyle.DayStyle"
+        style="@style/CalendarCellStyle.DayStyle"
         android:text="5"/>
     <TextView
         android:id="@+id/day6"
-        style="@style/CalendarStyle.DayStyle"
+        style="@style/CalendarCellStyle.DayStyle"
         android:text="6"/>
     <TextView
         android:id="@+id/day7"
-        style="@style/CalendarStyle.DayStyle"
+        style="@style/CalendarCellStyle.DayStyle"
         android:text="7"/>
 </LinearLayout>
