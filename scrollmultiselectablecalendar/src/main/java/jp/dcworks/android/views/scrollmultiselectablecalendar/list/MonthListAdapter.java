@@ -10,6 +10,7 @@ import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
@@ -148,7 +149,7 @@ public class MonthListAdapter<T extends Calendar> extends BaseAdapter implements
 
         View view;
         ViewHolder viewHolder;
-        if (convertView == null) {
+//        if (convertView == null) {
             view = this.mLayoutInflater.inflate(R.layout.inc_month, parent, false);
 
             viewHolder = new ViewHolder();
@@ -169,10 +170,10 @@ public class MonthListAdapter<T extends Calendar> extends BaseAdapter implements
             }
 
             view.setTag(viewHolder);
-        } else {
-            view = convertView;
-            viewHolder = (ViewHolder) view.getTag();
-        }
+//        } else {
+//            view = convertView;
+//            viewHolder = (ViewHolder) view.getTag();
+//        }
 
         final Calendar calendar = getItem(position);
         if (calendar == null) {
@@ -219,7 +220,10 @@ public class MonthListAdapter<T extends Calendar> extends BaseAdapter implements
             if (weekOfMonth < (i + 1)) {
                 // TODO tomo-sato とりあえず落ちるから暫定nullチェック
                 if (weekView != null) {
-                    weekView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.grey));
+                    ViewGroup viewGroup = (ViewGroup) weekView.getParent();
+                    if (viewGroup != null) {
+                        viewGroup.removeView(weekView);
+                    }
                 }
                 continue;
             }
@@ -231,15 +235,26 @@ public class MonthListAdapter<T extends Calendar> extends BaseAdapter implements
                     TextView dayTextView = weekViewSet.dayTextViewList.get(j);
 
                     // 余った日はViewを非表示にする。また1日未満の日を非表示にする。
-                    if ((dayOfMonth < day)
-                            || (day == 1 && oneOfWeek > (j + 1))) {
+                    if (dayOfMonth < day) {
+// TODO tomo-sato デバッグコード
+//                        dayTextView.setText("xx");
+//                        dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.red));
 
-                        dayTextView.setText(String.valueOf(day));
-                        dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.red));
+                        dayTextView.setVisibility(View.INVISIBLE);
+                        continue;
+                    }
+
+                    if ((day == 1 && oneOfWeek > (j + 1))) {
+// TODO tomo-sato デバッグコード
+//                        dayTextView.setText("yy");
+//                        dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.blue));
+
+                        dayTextView.setVisibility(View.INVISIBLE);
                         continue;
                     }
 
                     dayTextView.setText(String.valueOf(day));
+                    dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.black));
 
                     // TODO tomo-sato 【バグ】非表示部分に表示部分のクリックイベントがセットされている。
                     //textViewDay.setOnClickListener(this);
