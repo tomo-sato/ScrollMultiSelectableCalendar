@@ -2,17 +2,21 @@ package jp.dcworks.android.views.scrollmultiselectablecalendar.list;
 
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
+import android.support.v4.content.res.ResourcesCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ArrayAdapter;
+import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 
 import jp.dcworks.android.views.scrollmultiselectablecalendar.R;
 import jp.dcworks.android.views.scrollmultiselectablecalendar.consts.ScheduleMode;
@@ -23,7 +27,7 @@ import jp.dcworks.android.views.scrollmultiselectablecalendar.consts.ScheduleMod
  * @author tomo-sato
  * @since 1.0.0
  */
-public class MonthListAdapter extends ArrayAdapter<Calendar> implements View.OnClickListener {
+public class MonthListAdapter<T extends Calendar> extends BaseAdapter implements View.OnClickListener {
 
     /** TAG */
     private static final String TAG = MonthListAdapter.class.getSimpleName();
@@ -56,6 +60,9 @@ public class MonthListAdapter extends ArrayAdapter<Calendar> implements View.OnC
 
     /** LayoutInflater */
     private LayoutInflater mLayoutInflater;
+
+    /** Calendarリストオブジェクト */
+    private List<Calendar> mCalendarList;
 
     /** スケジュールモード */
     private ScheduleMode mScheduleMode = ScheduleMode.SINGLE;
@@ -99,15 +106,33 @@ public class MonthListAdapter extends ArrayAdapter<Calendar> implements View.OnC
      * コンストラクタ。
      *
      * @param context Context
-     * @param resourceId ResourcesID
-     * @param calendarList カレンダーリスト
+     * @param scheduleMode スケジュールモード
      * @author tomo-sato
      * @since 1.0.0
      */
-    public MonthListAdapter(Context context, int resourceId, ArrayList<Calendar> calendarList, ScheduleMode mScheduleMode) {
-        super(context, resourceId, calendarList);
+    public MonthListAdapter(Context context, ScheduleMode scheduleMode) {
+        super();
         this.mContext = context;
         this.mLayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        this.mCalendarList = new ArrayList<>();
+    }
+
+    @Override
+    public int getCount() {
+        return (this.mCalendarList != null) ? this.mCalendarList.size() : 0;
+    }
+
+    @Override
+    public Calendar getItem(int position) {
+        if (this.mCalendarList.isEmpty() || this.mCalendarList.size() <= position) {
+            return null;
+        }
+        return this.mCalendarList.get(position);
+    }
+
+    @Override
+    public long getItemId(int position) {
+        return 0;
     }
 
     /**
@@ -121,31 +146,57 @@ public class MonthListAdapter extends ArrayAdapter<Calendar> implements View.OnC
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
-        // convertViewは使い回しされている可能性があるのでnullの時だけ新しく作る
-        if (null == convertView) {
-            convertView = this.mLayoutInflater.inflate(R.layout.inc_month, null);
+        View view;
+        ViewHolder viewHolder;
+        if (convertView == null) {
+            view = this.mLayoutInflater.inflate(R.layout.inc_month, parent, false);
+
+            viewHolder = new ViewHolder();
+            // 年月テキスト
+            viewHolder.monthTextView = (TextView) view.findViewById(R.id.month_text_view);
+            // 各週
+            int weekLength = INCLUDE_WEEK_RESOURCES_ID_ARRAY.length;
+            int dayLength = INCLUDE_DAY_RESOURCES_ID_ARRAY.length;
+            for (int i = 0; i < weekLength; i++) {
+                ViewHolder.WeekViewSet weekViewSet = new ViewHolder.WeekViewSet();
+                weekViewSet.weekView = view.findViewById(INCLUDE_WEEK_RESOURCES_ID_ARRAY[i]);
+
+                for (int j = 0; j < dayLength; j++) {
+                    weekViewSet.dayTextViewList.add((TextView) weekViewSet.weekView.findViewById(INCLUDE_DAY_RESOURCES_ID_ARRAY[j]));
+                }
+
+                viewHolder.weekViewSetList.add(weekViewSet);
+            }
+
+            view.setTag(viewHolder);
+        } else {
+            view = convertView;
+            viewHolder = (ViewHolder) view.getTag();
         }
 
-        Calendar calendar = getItem(position);
+        final Calendar calendar = getItem(position);
+        if (calendar == null) {
+            return view;
+        }
+
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月");
 
         // 年月をセット
-        TextView monthTextView = (TextView) convertView.findViewById(R.id.month_text_view);
-        monthTextView.setText(simpleDateFormat.format(calendar.getTime()));
+        viewHolder.monthTextView.setText(simpleDateFormat.format(calendar.getTime()));
 
         // 日をセット
-        setWeekView(calendar, convertView);
+        setWeekView(calendar, viewHolder);
 
-        return convertView;
+        return view;
     }
 
     /**
      * 日をセットする。
      *
      * @param calendar 表示するカレンダー
-     * @param convertView 表示対象のView
+     * @param viewHolder Viewホルダー
      */
-    private void setWeekView(Calendar calendar, View convertView) {
+    private void setWeekView(Calendar calendar, ViewHolder viewHolder) {
 
         // 1日の曜日を取得する。
         int oneOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
@@ -161,35 +212,34 @@ public class MonthListAdapter extends ArrayAdapter<Calendar> implements View.OnC
 
         // 週
         for (int i = 0; i < 6; i++) {
-            View weekView = convertView.findViewById(INCLUDE_WEEK_RESOURCES_ID_ARRAY[i]);
+            ViewHolder.WeekViewSet weekViewSet = viewHolder.weekViewSetList.get(i);
+            View weekView = weekViewSet.weekView;
 
             // 余った週はViewから削除する。
             if (weekOfMonth < (i + 1)) {
+                // TODO tomo-sato とりあえず落ちるから暫定nullチェック
                 if (weekView != null) {
-                    ViewGroup viewGroup = (ViewGroup) weekView.getParent();
-                    viewGroup.removeView(weekView);
+                    weekView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.grey));
                 }
                 continue;
             }
 
             // 日
             for (int j = 0; j < 7; j++) {
+                // TODO tomo-sato とりあえず落ちるから暫定nullチェック
                 if (weekView != null) {
-                    TextView textViewDay = (TextView) weekView.findViewById(INCLUDE_DAY_RESOURCES_ID_ARRAY[j]);
+                    TextView dayTextView = weekViewSet.dayTextViewList.get(j);
 
                     // 余った日はViewを非表示にする。また1日未満の日を非表示にする。
                     if ((dayOfMonth < day)
                             || (day == 1 && oneOfWeek > (j + 1))) {
-                        Log.d(TAG, "dayOfMonth=" + dayOfMonth + ", day=" + day + ", oneOfWeek=" + oneOfWeek);
 
-
-//                        textViewDay.setVisibility(View.INVISIBLE);
-                        textViewDay.setText(String.valueOf(day));
-                        textViewDay.setTextColor(ContextCompat.getColor(mContext, R.color.red));
+                        dayTextView.setText(String.valueOf(day));
+                        dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.red));
                         continue;
                     }
 
-                    textViewDay.setText(String.valueOf(day));
+                    dayTextView.setText(String.valueOf(day));
 
                     // TODO tomo-sato 【バグ】非表示部分に表示部分のクリックイベントがセットされている。
                     //textViewDay.setOnClickListener(this);
@@ -240,5 +290,41 @@ public class MonthListAdapter extends ArrayAdapter<Calendar> implements View.OnC
      * @since 1.0.0
      */
     private void onClickAsRangeMode(View view) {
+    }
+
+    /**
+     * リストクリア処理。
+     * @author tomo-sato
+     * @since 1.0.0
+     */
+    public void clear() {
+        this.mCalendarList.clear();
+        notifyDataSetChanged();
+    }
+
+    /**
+     * 引数に指定されたリストを追加する。
+     * @param list 表示項目リスト
+     */
+    public void addAll(List<Calendar> list) {
+        this.mCalendarList.addAll(list);
+    }
+
+    /**
+     * ViewHolderクラス。
+     * @author tomo-sato
+     * @since 1.0.0
+     */
+    private static class ViewHolder {
+        /** 年月 */
+        TextView monthTextView;
+
+        /** 各週 */
+        List<WeekViewSet> weekViewSetList = new ArrayList<>();
+
+        private static class WeekViewSet {
+            View weekView;
+            List<TextView> dayTextViewList = new ArrayList<>();
+        }
     }
 }

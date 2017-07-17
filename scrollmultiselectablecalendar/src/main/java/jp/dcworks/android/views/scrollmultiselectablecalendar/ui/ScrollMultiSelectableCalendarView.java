@@ -205,14 +205,22 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
         listItem.add(getCalendar(2017, 5));
         listItem.add(getCalendar(2017, 6));
 
-        // 表示するカレンダーのリストをアダプタにセットする。
-        MonthListAdapter monthListAdapter = new MonthListAdapter(layout.getContext(), 0, listItem, this.mScheduleMode);
-        // 呼び出し元へ通知するためリスナーをセットする。
-        monthListAdapter.setOnDateClickListener(this);
+//        // 表示するカレンダーのリストをアダプタにセットする。
+//        MonthListAdapter monthListAdapter = new MonthListAdapter(layout.getContext(), 0, listItem, this.mScheduleMode);
+//        // 呼び出し元へ通知するためリスナーをセットする。
+//        monthListAdapter.setOnDateClickListener(this);
+//
+//        // ListView生成。
+//        ListView listView = (ListView) findViewById(R.id.month_list);
+//        listView.setAdapter(monthListAdapter);
 
-        // ListView生成。
         ListView listView = (ListView) findViewById(R.id.month_list);
+        MonthListAdapter monthListAdapter = new MonthListAdapter(layout.getContext(), this.mScheduleMode);
         listView.setAdapter(monthListAdapter);
+
+        monthListAdapter.clear();
+        monthListAdapter.addAll(listItem);
+        monthListAdapter.notifyDataSetChanged();
 
         return;
     }
