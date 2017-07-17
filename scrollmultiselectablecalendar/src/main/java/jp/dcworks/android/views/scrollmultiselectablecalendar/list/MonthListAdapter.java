@@ -257,52 +257,52 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
                     // 日付をカレンダーにセットする。
                     calendar.set(Calendar.DATE, day);
 
-                    // 選択状態（個別選択）をセットする。
-                    if (this.mAvailableSchedule.selectedCalendarList != null && !this.mAvailableSchedule.selectedCalendarList.isEmpty()) {
-                        for (Calendar selectedCalendar : this.mAvailableSchedule.selectedCalendarList) {
-                            if (selectedCalendar.compareTo(calendar) == 0) {
-                                dayTextView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.available_day_background));
-                                dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.white));
-                            }
-                        }
-                    }
-
-                    // 選択状態（範囲選択）をセットする。
-                    if (this.mAvailableSchedule.selectedFromCalendar != null && this.mAvailableSchedule.selectedToCalendar != null) {
-
-                        if ((this.mAvailableSchedule.selectedFromCalendar != null && this.mAvailableSchedule.selectedFromCalendar.compareTo(calendar) <= 0)
-                                && (this.mAvailableSchedule.selectedToCalendar != null && this.mAvailableSchedule.selectedToCalendar.compareTo(calendar) >= 0)) {
-
-                            dayTextView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.available_day_background));
-                            dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.white));
-                        }
-
-                    } else if (this.mAvailableSchedule.selectedFromCalendar != null && this.mAvailableSchedule.selectedToCalendar == null) {
-
-                        if (this.mAvailableSchedule.selectedFromCalendar.compareTo(calendar) == 0) {
-                            dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.available_day_background));
-                        }
-                    }
-
-                    // クリックイベントをセットする。
-                    if ((this.mAvailableSchedule.selectableFromCalendar != null && this.mAvailableSchedule.selectableFromCalendar.compareTo(calendar) <= 0)
-                            && (this.mAvailableSchedule.selectableToCalendar != null && this.mAvailableSchedule.selectableToCalendar.compareTo(calendar) >= 0)) {
-
-                        dayTextView.setOnClickListener(this);
-
-                    } else if ((this.mAvailableSchedule.selectableFromCalendar != null && this.mAvailableSchedule.selectableFromCalendar.compareTo(calendar) <= 0)
-                            && (this.mAvailableSchedule.selectableToCalendar == null)) {
-
-                        dayTextView.setOnClickListener(this);
-
-                    } else if ((this.mAvailableSchedule.selectableFromCalendar == null)
-                            && (this.mAvailableSchedule.selectableToCalendar != null && this.mAvailableSchedule.selectableToCalendar.compareTo(calendar) >= 0)) {
-
-                        dayTextView.setOnClickListener(this);
-
-                    } else {
-                        dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.grey));
-                    }
+//                    // 選択状態（個別選択）をセットする。
+//                    if (this.mAvailableSchedule.selectedCalendarList != null && !this.mAvailableSchedule.selectedCalendarList.isEmpty()) {
+//                        for (Calendar selectedCalendar : this.mAvailableSchedule.selectedCalendarList) {
+//                            if (selectedCalendar.compareTo(calendar) == 0) {
+//                                dayTextView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.available_day_background));
+//                                dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.white));
+//                            }
+//                        }
+//                    }
+//
+//                    // 選択状態（範囲選択）をセットする。
+//                    if (this.mAvailableSchedule.selectedFromCalendar != null && this.mAvailableSchedule.selectedToCalendar != null) {
+//
+//                        if ((this.mAvailableSchedule.selectedFromCalendar != null && this.mAvailableSchedule.selectedFromCalendar.compareTo(calendar) <= 0)
+//                                && (this.mAvailableSchedule.selectedToCalendar != null && this.mAvailableSchedule.selectedToCalendar.compareTo(calendar) >= 0)) {
+//
+//                            dayTextView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.available_day_background));
+//                            dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.white));
+//                        }
+//
+//                    } else if (this.mAvailableSchedule.selectedFromCalendar != null && this.mAvailableSchedule.selectedToCalendar == null) {
+//
+//                        if (this.mAvailableSchedule.selectedFromCalendar.compareTo(calendar) == 0) {
+//                            dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.available_day_background));
+//                        }
+//                    }
+//
+//                    // クリックイベントをセットする。
+//                    if ((this.mAvailableSchedule.selectableFromCalendar != null && this.mAvailableSchedule.selectableFromCalendar.compareTo(calendar) <= 0)
+//                            && (this.mAvailableSchedule.selectableToCalendar != null && this.mAvailableSchedule.selectableToCalendar.compareTo(calendar) >= 0)) {
+//
+//                        dayTextView.setOnClickListener(this);
+//
+//                    } else if ((this.mAvailableSchedule.selectableFromCalendar != null && this.mAvailableSchedule.selectableFromCalendar.compareTo(calendar) <= 0)
+//                            && (this.mAvailableSchedule.selectableToCalendar == null)) {
+//
+//                        dayTextView.setOnClickListener(this);
+//
+//                    } else if ((this.mAvailableSchedule.selectableFromCalendar == null)
+//                            && (this.mAvailableSchedule.selectableToCalendar != null && this.mAvailableSchedule.selectableToCalendar.compareTo(calendar) >= 0)) {
+//
+//                        dayTextView.setOnClickListener(this);
+//
+//                    } else {
+//                        dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.grey));
+//                    }
                     day++;
                 }
             }

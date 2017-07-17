@@ -10,9 +10,11 @@ import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.TimeZone;
 
 import jp.dcworks.android.views.scrollmultiselectablecalendar.R;
@@ -39,11 +41,14 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
     /** スケジュールモード */
     private ScheduleMode mScheduleMode = ScheduleMode.SINGLE;
 
+    /** カレンダーの状態 */
+    private AvailableSchedule mAvailableSchedule = new AvailableSchedule();
 
-    /** 表示カレンダー：開始カレンダー */
-    private Calendar mViewFromCalendar;
-    /** 表示カレンダー：終了カレンダー */
-    private Calendar mViewToCalendar;
+    /** カレンダーの状態 */
+    private List<Calendar> mViewCalendar = new ArrayList<>();
+
+    /** 月リストアダプター */
+    private MonthListAdapter mMonthListAdapter;
 
     // attributes ---------------
     /** xml属性：色設定：週バックグラウンドカラー */
@@ -199,62 +204,53 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
         View layout = LayoutInflater.from(this.mContext).inflate(R.layout.scroll_multi_selectable_calendar_view, this);
 
         // 表示するカレンダーのリストを生成する。
-        final ArrayList<Calendar> listItem = new ArrayList<>();
-        listItem.add(getCalendar(2017, 1));
-        listItem.add(getCalendar(2017, 2));
-        listItem.add(getCalendar(2017, 3));
-        listItem.add(getCalendar(2017, 4));
-        listItem.add(getCalendar(2017, 5));
-        listItem.add(getCalendar(2017, 6));
-        listItem.add(getCalendar(2017, 7));
-        listItem.add(getCalendar(2017, 8));
-        listItem.add(getCalendar(2017, 9));
-        listItem.add(getCalendar(2017, 10));
-        listItem.add(getCalendar(2017, 11));
-        listItem.add(getCalendar(2017, 12));
+        this.mViewCalendar = new ArrayList<>();
+        this.mViewCalendar.add(getCalendar(2017, 1));
+        this.mViewCalendar.add(getCalendar(2017, 2));
+        this.mViewCalendar.add(getCalendar(2017, 3));
+        this.mViewCalendar.add(getCalendar(2017, 4));
+        this.mViewCalendar.add(getCalendar(2017, 5));
+        this.mViewCalendar.add(getCalendar(2017, 6));
+        this.mViewCalendar.add(getCalendar(2017, 7));
+        this.mViewCalendar.add(getCalendar(2017, 8));
+        this.mViewCalendar.add(getCalendar(2017, 9));
+        this.mViewCalendar.add(getCalendar(2017, 10));
+        this.mViewCalendar.add(getCalendar(2017, 11));
+        this.mViewCalendar.add(getCalendar(2017, 12));
 
-        AvailableSchedule availableSchedule = new AvailableSchedule();
-        availableSchedule.selectableFromCalendar = getCalendar(2017, 1, 10);
-        availableSchedule.selectableToCalendar = getCalendar(2017, 9, 10);
-
-        availableSchedule.selectedCalendarList.add(getCalendar(2017, 1, 13));
-        availableSchedule.selectedCalendarList.add(getCalendar(2017, 2, 14));
-        availableSchedule.selectedCalendarList.add(getCalendar(2017, 3, 15));
-
-        availableSchedule.selectedFromCalendar = getCalendar(2017, 4, 10);
-        availableSchedule.selectedToCalendar = getCalendar(2017, 5, 10);
-
+        this.mAvailableSchedule.selectableFromCalendar = getCalendar(2017, 1, 10);
+        this.mAvailableSchedule.selectableToCalendar = getCalendar(2017, 9, 10);
 
         ListView listView = (ListView) findViewById(R.id.month_list);
-        final MonthListAdapter monthListAdapter = new MonthListAdapter(layout.getContext());
-        monthListAdapter.setOnDateClickListener(this);
-        listView.setAdapter(monthListAdapter);
+        this.mMonthListAdapter = new MonthListAdapter(layout.getContext());
+        this.mMonthListAdapter.setOnDateClickListener(this);
+        listView.setAdapter(this.mMonthListAdapter);
 
-        monthListAdapter.clear();
-        monthListAdapter.addAll(listItem);
-        monthListAdapter.setAvailableSchedule(availableSchedule);
-        monthListAdapter.notifyDataSetChanged();
+        this.mMonthListAdapter.clear();
+        this.mMonthListAdapter.addAll(this.mViewCalendar);
+        this.mMonthListAdapter.setAvailableSchedule(this.mAvailableSchedule);
+        this.mMonthListAdapter.notifyDataSetChanged();
 
         // TODO tomo-sato テスト
         View view = layout.findViewById(R.id.dayOfWeek1);
         view.setOnClickListener(new OnClickListener() {
             @Override
             public void onClick(View v) {
-                AvailableSchedule availableSchedule = new AvailableSchedule();
-                availableSchedule.selectableFromCalendar = getCalendar(2017, 1, 10);
-                availableSchedule.selectableToCalendar = getCalendar(2017, 9, 10);
+                ScrollMultiSelectableCalendarView.this.mAvailableSchedule = new AvailableSchedule();
+                ScrollMultiSelectableCalendarView.this.mAvailableSchedule.selectableFromCalendar = getCalendar(2017, 1, 10);
+                ScrollMultiSelectableCalendarView.this.mAvailableSchedule.selectableToCalendar = getCalendar(2017, 9, 10);
 
-                availableSchedule.selectedCalendarList.add(getCalendar(2017, 4, 13));
-                availableSchedule.selectedCalendarList.add(getCalendar(2017, 5, 14));
-                availableSchedule.selectedCalendarList.add(getCalendar(2017, 6, 15));
+                ScrollMultiSelectableCalendarView.this.mAvailableSchedule.selectedCalendarList.add(getCalendar(2017, 4, 13));
+                ScrollMultiSelectableCalendarView.this.mAvailableSchedule.selectedCalendarList.add(getCalendar(2017, 5, 14));
+                ScrollMultiSelectableCalendarView.this.mAvailableSchedule.selectedCalendarList.add(getCalendar(2017, 6, 15));
 
-                availableSchedule.selectedFromCalendar = getCalendar(2017, 1, 12);
-                availableSchedule.selectedToCalendar = getCalendar(2017, 2, 10);
+                ScrollMultiSelectableCalendarView.this.mAvailableSchedule.selectedFromCalendar = getCalendar(2017, 1, 12);
+                ScrollMultiSelectableCalendarView.this.mAvailableSchedule.selectedToCalendar = getCalendar(2017, 2, 10);
 
-                monthListAdapter.clear();
-                monthListAdapter.addAll(listItem);
-                monthListAdapter.setAvailableSchedule(availableSchedule);
-                monthListAdapter.notifyDataSetChanged();
+                ScrollMultiSelectableCalendarView.this.mMonthListAdapter.clear();
+                ScrollMultiSelectableCalendarView.this.mMonthListAdapter.addAll(ScrollMultiSelectableCalendarView.this.mViewCalendar);
+                ScrollMultiSelectableCalendarView.this.mMonthListAdapter.setAvailableSchedule(ScrollMultiSelectableCalendarView.this.mAvailableSchedule);
+                ScrollMultiSelectableCalendarView.this.mMonthListAdapter.notifyDataSetChanged();
             }
         });
 
@@ -265,11 +261,31 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
     public void onDateClick(View view, Calendar calendar) {
         Log.d(TAG, SimpleDate.toSimpleDate(calendar).toString());
 
+        if(this.mScheduleMode == ScheduleMode.SINGLE) {
+            onClickAtSingleMode(calendar);
+        } else if(this.mScheduleMode == ScheduleMode.RANGE) {
+            onClickAsRangeMode(calendar);
+        } else if(this.mScheduleMode == ScheduleMode.DISPLAY) {
+
+        }
+
         // リスナーがセットされている場合、クリック時のイベントを通知する。
         if (this.mOnDateClickListener != null) {
             this.mOnDateClickListener.onDateClick(view, calendar);
         }
         return;
+    }
+
+    private void onClickAtSingleMode(Calendar calendar) {
+        this.mAvailableSchedule.selectedCalendarList.add(calendar);
+
+        this.mMonthListAdapter.clear();
+        this.mMonthListAdapter.addAll(this.mViewCalendar);
+        this.mMonthListAdapter.setAvailableSchedule(this.mAvailableSchedule);
+        this.mMonthListAdapter.notifyDataSetChanged();
+    }
+
+    private void onClickAsRangeMode(Calendar calendar) {
     }
 
     /**
