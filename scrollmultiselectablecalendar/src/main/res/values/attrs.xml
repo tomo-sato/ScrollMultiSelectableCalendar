@@ -1,8 +1,30 @@
 <resources>
     <declare-styleable name="ScrollMultiSelectableCalendarView">
-        <attr name="exampleString" format="string"/>
-        <attr name="exampleDimension" format="dimension"/>
-        <attr name="exampleColor" format="color"/>
-        <attr name="exampleDrawable" format="color|reference"/>
+        <!-- 週 -->
+        <attr name="weekBackgroundColor" format="color" />
+        <attr name="weekTextColor" format="color" />
+
+        <!-- 年月 -->
+        <attr name="monthBackgroundColor" format="color" />
+        <attr name="monthTextColor" format="color" />
+
+        <!-- 日 -->
+        <attr name="dayBackgroundColor" format="color" />
+        <attr name="dayTextColor" format="color" />
+
+        <!-- 日（選択） -->
+        <attr name="availableDayBackgroundColor" format="color" />
+        <attr name="availableDayTextColor" format="color" />
+
+        <!-- 日（除外） -->
+        <attr name="unavailableDayBackgroundColor" format="color" />
+        <attr name="unavailableDayTextColor" format="color" />
+
+        <!-- 日（選択不可） -->
+        <attr name="disableDayTextColor" format="color" />
+    </declare-styleable>
+
+    <declare-styleable name="Themes">
+        <attr name="originalViewStyle" format="reference" />
     </declare-styleable>
 </resources>

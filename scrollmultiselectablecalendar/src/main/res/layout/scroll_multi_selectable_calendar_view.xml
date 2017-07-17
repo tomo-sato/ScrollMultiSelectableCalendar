@@ -50,22 +50,15 @@
                 android:text="土"/>
         </LinearLayout>
 
-        <ScrollView
+        <View
             android:layout_width="match_parent"
-            android:layout_height="match_parent">
+            android:layout_height="0.5px"
+            android:background="@color/black" />
 
-            <LinearLayout
-                android:layout_width="match_parent"
-                android:layout_height="match_parent"
-                android:orientation="vertical">
+        <ListView
+            android:id="@+id/month_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent" />
 
-                <include layout="@layout/inc_month" android:id="@+id/include_month_1"/>
-                <include layout="@layout/inc_month" android:id="@+id/include_month_2"/>
-                <include layout="@layout/inc_month" android:id="@+id/include_month_3"/>
-                <include layout="@layout/inc_month" android:id="@+id/include_month_4"/>
-                <include layout="@layout/inc_month" android:id="@+id/include_month_5"/>
-
-            </LinearLayout>
-        </ScrollView>
     </LinearLayout>
 </FrameLayout>
