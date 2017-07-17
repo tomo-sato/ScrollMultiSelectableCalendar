@@ -257,7 +257,8 @@ public class MonthListAdapter<T extends Calendar> extends BaseAdapter implements
                     dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.black));
 
                     // TODO tomo-sato 【バグ】非表示部分に表示部分のクリックイベントがセットされている。
-                    //textViewDay.setOnClickListener(this);
+                    // TODO tomo-sato リサイクルしていない都合、タップ状態をViewHolderに保持する必要がある。
+                    dayTextView.setOnClickListener(this);
 
                     day++;
                 }
