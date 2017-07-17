@@ -2,17 +2,14 @@ package jp.dcworks.android.views.scrollmultiselectablecalendar.list;
 
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
-import android.support.v4.content.res.ResourcesCompat;
 import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.ArrayAdapter;
 import android.widget.BaseAdapter;
-import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -21,6 +18,7 @@ import java.util.List;
 
 import jp.dcworks.android.views.scrollmultiselectablecalendar.R;
 import jp.dcworks.android.views.scrollmultiselectablecalendar.consts.ScheduleMode;
+import jp.dcworks.android.views.scrollmultiselectablecalendar.entity.SimpleDate;
 
 /**
  * 月リストのアダプタ。
@@ -28,7 +26,7 @@ import jp.dcworks.android.views.scrollmultiselectablecalendar.consts.ScheduleMod
  * @author tomo-sato
  * @since 1.0.0
  */
-public class MonthListAdapter<T extends Calendar> extends BaseAdapter implements View.OnClickListener {
+public class MonthListAdapter extends BaseAdapter implements View.OnClickListener {
 
     /** TAG */
     private static final String TAG = MonthListAdapter.class.getSimpleName();
@@ -68,6 +66,13 @@ public class MonthListAdapter<T extends Calendar> extends BaseAdapter implements
     /** スケジュールモード */
     private ScheduleMode mScheduleMode = ScheduleMode.SINGLE;
 
+    /** 年月フォーマット */
+    private String mYearMonthFormat = "yyyy年MM月";
+
+    /** 初回タップ時の日付 */
+    private SimpleDate mFirstSelectedDate;
+    /** ２回目タップ時の日付 */
+    private SimpleDate mSecondSelectedDate;
 
     /**
      * 日付クリック時のイベントリスナー。
@@ -85,8 +90,8 @@ public class MonthListAdapter<T extends Calendar> extends BaseAdapter implements
          * @author tomo-sato
          * @since 1.0.0
          */
-        public void onClick(View view, Date date);
-    };
+        void onClick(View view, Date date);
+    }
 
     /** 日付クリック時のイベントリスナーのメンバ変数。 */
     private OnDateClickListener mOnDateClickListener;
@@ -116,6 +121,7 @@ public class MonthListAdapter<T extends Calendar> extends BaseAdapter implements
         this.mContext = context;
         this.mLayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.mCalendarList = new ArrayList<>();
+        this.mScheduleMode = scheduleMode;
     }
 
     @Override
@@ -136,34 +142,26 @@ public class MonthListAdapter<T extends Calendar> extends BaseAdapter implements
         return 0;
     }
 
-    /**
-     * リストビューの表示処理。
-     *
-     * @param position ポジション
-     * @param convertView View
-     * @param parent ViewGroup
-     * @return
-     */
     @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
-        View view;
-        ViewHolder viewHolder;
-//        if (convertView == null) {
-            view = this.mLayoutInflater.inflate(R.layout.inc_month, parent, false);
+//        View view;
+//        ViewHolder viewHolder;
 
-            viewHolder = new ViewHolder();
+// TODO tomo-sato リサイクルできるようなら調整する。
+//        if (convertView == null) {
+            View view = this.mLayoutInflater.inflate(R.layout.inc_month, parent, false);
+
+            ViewHolder viewHolder = new ViewHolder();
             // 年月テキスト
             viewHolder.monthTextView = (TextView) view.findViewById(R.id.month_text_view);
             // 各週
-            int weekLength = INCLUDE_WEEK_RESOURCES_ID_ARRAY.length;
-            int dayLength = INCLUDE_DAY_RESOURCES_ID_ARRAY.length;
-            for (int i = 0; i < weekLength; i++) {
+            for (int weekResId : INCLUDE_WEEK_RESOURCES_ID_ARRAY) {
                 ViewHolder.WeekViewSet weekViewSet = new ViewHolder.WeekViewSet();
-                weekViewSet.weekView = view.findViewById(INCLUDE_WEEK_RESOURCES_ID_ARRAY[i]);
+                weekViewSet.weekView = view.findViewById(weekResId);
 
-                for (int j = 0; j < dayLength; j++) {
-                    weekViewSet.dayTextViewList.add((TextView) weekViewSet.weekView.findViewById(INCLUDE_DAY_RESOURCES_ID_ARRAY[j]));
+                for (int dayResId : INCLUDE_DAY_RESOURCES_ID_ARRAY) {
+                    weekViewSet.dayTextViewList.add((TextView) weekViewSet.weekView.findViewById(dayResId));
                 }
 
                 viewHolder.weekViewSetList.add(weekViewSet);
@@ -180,7 +178,7 @@ public class MonthListAdapter<T extends Calendar> extends BaseAdapter implements
             return view;
         }
 
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat("yyyy年MM月");
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(this.mYearMonthFormat);
 
         // 年月をセット
         viewHolder.monthTextView.setText(simpleDateFormat.format(calendar.getTime()));
@@ -218,7 +216,6 @@ public class MonthListAdapter<T extends Calendar> extends BaseAdapter implements
 
             // 余った週はViewから削除する。
             if (weekOfMonth < (i + 1)) {
-                // TODO tomo-sato とりあえず落ちるから暫定nullチェック
                 if (weekView != null) {
                     ViewGroup viewGroup = (ViewGroup) weekView.getParent();
                     if (viewGroup != null) {
@@ -230,31 +227,36 @@ public class MonthListAdapter<T extends Calendar> extends BaseAdapter implements
 
             // 日
             for (int j = 0; j < 7; j++) {
-                // TODO tomo-sato とりあえず落ちるから暫定nullチェック
                 if (weekView != null) {
                     TextView dayTextView = weekViewSet.dayTextViewList.get(j);
 
                     // 余った日はViewを非表示にする。また1日未満の日を非表示にする。
                     if (dayOfMonth < day) {
-// TODO tomo-sato デバッグコード
-//                        dayTextView.setText("xx");
-//                        dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.red));
-
                         dayTextView.setVisibility(View.INVISIBLE);
                         continue;
                     }
 
+                    // 1日未満の日を非表示にする。
                     if ((day == 1 && oneOfWeek > (j + 1))) {
-// TODO tomo-sato デバッグコード
-//                        dayTextView.setText("yy");
-//                        dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.blue));
-
                         dayTextView.setVisibility(View.INVISIBLE);
                         continue;
                     }
 
                     dayTextView.setText(String.valueOf(day));
-                    dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.black));
+                    switch (j) {
+                        // 日曜
+                        case 0:
+                            dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.red));
+                            break;
+
+                        // 土曜
+                        case 6:
+                            dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.blue));
+                            break;
+
+                        default:
+                            dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.black));
+                    }
 
                     // TODO tomo-sato 【バグ】非表示部分に表示部分のクリックイベントがセットされている。
                     // TODO tomo-sato リサイクルしていない都合、タップ状態をViewHolderに保持する必要がある。
@@ -269,7 +271,6 @@ public class MonthListAdapter<T extends Calendar> extends BaseAdapter implements
 
     @Override
     public void onClick(View view) {
-        Log.d("tomo-sato", "クリックされました。");
 
         if(this.mScheduleMode == ScheduleMode.SINGLE) {
             onClickAtSingleMode(view);
@@ -287,8 +288,9 @@ public class MonthListAdapter<T extends Calendar> extends BaseAdapter implements
 
     /**
      * シングル選択時のタップ動作。
+     * TODO tomo-sato 未実装
      *
-     * @param view
+     * @param view View
      * @author tomo-sato
      * @since 1.0.0
      */
@@ -300,12 +302,58 @@ public class MonthListAdapter<T extends Calendar> extends BaseAdapter implements
 
     /**
      * マルチ選択時のタップ動作。
+     * TODO tomo-sato 未実装
      *
-     * @param view
+     * @param view View
      * @author tomo-sato
      * @since 1.0.0
      */
     private void onClickAsRangeMode(View view) {
+        TextView dayText = (TextView) view;
+
+        // タップされた年月を取得する。
+        // TODO tomo-sato 親を辿っているためレイアウトに依存している。他に方法が無いか要検討。
+        ViewGroup viewWeekGroup = (ViewGroup) view.getParent();
+        ViewGroup viewLinearLayoutGroup = (ViewGroup) viewWeekGroup.getParent();
+        ViewGroup viewMonthLinearLayoutGroup = (ViewGroup) viewLinearLayoutGroup.getParent();
+        String yearMonthStr = ((TextView) viewMonthLinearLayoutGroup.findViewById(R.id.month_text_view)).getText().toString();
+
+        // TODO tomo-sato 年月取得暫定
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(this.mYearMonthFormat);
+        Date date = null;
+        try {
+            date = simpleDateFormat.parse(yearMonthStr);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+
+        // TODO tomo-sato 年月暫定
+        SimpleDate simpleDate = new SimpleDate(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1, Integer.parseInt(dayText.getText().toString()));
+
+        if (this.mFirstSelectedDate == null) {
+            Log.d(TAG, simpleDate.toString());
+            this.mFirstSelectedDate = simpleDate;
+
+            dayText.setTextColor(ContextCompat.getColor(this.mContext, R.color.red));
+
+        } else {
+            Log.d(TAG, simpleDate.toString());
+            this.mSecondSelectedDate = simpleDate;
+            selectDaysByRange();
+
+            dayText.setBackgroundColor(ContextCompat.getColor(this.mContext, R.color.available_day_background));
+            dayText.setTextColor(ContextCompat.getColor(this.mContext, R.color.white));
+
+        }
+    }
+
+    /**
+     * 範囲選択で選択状態とする。
+     */
+    private void selectDaysByRange() {
+
     }
 
     /**
@@ -321,6 +369,8 @@ public class MonthListAdapter<T extends Calendar> extends BaseAdapter implements
     /**
      * 引数に指定されたリストを追加する。
      * @param list 表示項目リスト
+     * @author tomo-sato
+     * @since 1.0.0
      */
     public void addAll(List<Calendar> list) {
         this.mCalendarList.addAll(list);
