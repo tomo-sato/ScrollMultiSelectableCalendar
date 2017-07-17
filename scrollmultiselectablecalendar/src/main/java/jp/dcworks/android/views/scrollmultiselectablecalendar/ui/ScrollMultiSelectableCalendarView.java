@@ -5,6 +5,7 @@ import android.content.res.TypedArray;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -12,11 +13,12 @@ import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.TimeZone;
 
 import jp.dcworks.android.views.scrollmultiselectablecalendar.R;
 import jp.dcworks.android.views.scrollmultiselectablecalendar.consts.ScheduleMode;
+import jp.dcworks.android.views.scrollmultiselectablecalendar.entity.AvailableSchedule;
+import jp.dcworks.android.views.scrollmultiselectablecalendar.entity.SimpleDate;
 import jp.dcworks.android.views.scrollmultiselectablecalendar.list.MonthListAdapter;
 
 /**
@@ -84,12 +86,12 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
         /**
          * 日付クリック時のイベントを通知する。
          *
-         * @param view クリックされたView。
-         * @param date クリックされたViewの日付。
+         * @param view クリックされたViewを通知する。
+         * @param calendar クリックされたViewのカレンダーを通知する。
          * @author tomo-sato
          * @since 1.0.0
          */
-        public void onClick(View view, Date date);
+        void onDateClick(View view, Calendar calendar);
     };
 
     /** 日付クリック時のイベントリスナーのメンバ変数。 */
@@ -197,7 +199,7 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
         View layout = LayoutInflater.from(this.mContext).inflate(R.layout.scroll_multi_selectable_calendar_view, this);
 
         // 表示するカレンダーのリストを生成する。
-        ArrayList<Calendar> listItem = new ArrayList<>();
+        final ArrayList<Calendar> listItem = new ArrayList<>();
         listItem.add(getCalendar(2017, 1));
         listItem.add(getCalendar(2017, 2));
         listItem.add(getCalendar(2017, 3));
@@ -211,27 +213,61 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
         listItem.add(getCalendar(2017, 11));
         listItem.add(getCalendar(2017, 12));
 
+        AvailableSchedule availableSchedule = new AvailableSchedule();
+        availableSchedule.selectableFromCalendar = getCalendar(2017, 1, 10);
+        availableSchedule.selectableToCalendar = getCalendar(2017, 9, 10);
+
+        availableSchedule.selectedCalendarList.add(getCalendar(2017, 1, 13));
+        availableSchedule.selectedCalendarList.add(getCalendar(2017, 2, 14));
+        availableSchedule.selectedCalendarList.add(getCalendar(2017, 3, 15));
+
+        availableSchedule.selectedFromCalendar = getCalendar(2017, 4, 10);
+        availableSchedule.selectedToCalendar = getCalendar(2017, 5, 10);
+
+
         ListView listView = (ListView) findViewById(R.id.month_list);
-        MonthListAdapter monthListAdapter = new MonthListAdapter(layout.getContext(), ScheduleMode.RANGE);
+        final MonthListAdapter monthListAdapter = new MonthListAdapter(layout.getContext());
+        monthListAdapter.setOnDateClickListener(this);
         listView.setAdapter(monthListAdapter);
 
         monthListAdapter.clear();
         monthListAdapter.addAll(listItem);
+        monthListAdapter.setAvailableSchedule(availableSchedule);
         monthListAdapter.notifyDataSetChanged();
+
+        // TODO tomo-sato テスト
+        View view = layout.findViewById(R.id.dayOfWeek1);
+        view.setOnClickListener(new OnClickListener() {
+            @Override
+            public void onClick(View v) {
+                AvailableSchedule availableSchedule = new AvailableSchedule();
+                availableSchedule.selectableFromCalendar = getCalendar(2017, 1, 10);
+                availableSchedule.selectableToCalendar = getCalendar(2017, 9, 10);
+
+                availableSchedule.selectedCalendarList.add(getCalendar(2017, 4, 13));
+                availableSchedule.selectedCalendarList.add(getCalendar(2017, 5, 14));
+                availableSchedule.selectedCalendarList.add(getCalendar(2017, 6, 15));
+
+                availableSchedule.selectedFromCalendar = getCalendar(2017, 1, 12);
+                availableSchedule.selectedToCalendar = getCalendar(2017, 2, 10);
+
+                monthListAdapter.clear();
+                monthListAdapter.addAll(listItem);
+                monthListAdapter.setAvailableSchedule(availableSchedule);
+                monthListAdapter.notifyDataSetChanged();
+            }
+        });
 
         return;
     }
 
-    /**
-     * 日付クリック時のイベントを通知する。
-     *
-     * @param view クリックされたView。
-     * @param date クリックされたViewの日付。
-     */
     @Override
-    public void onClick(View view, Date date) {
+    public void onDateClick(View view, Calendar calendar) {
+        Log.d(TAG, SimpleDate.toSimpleDate(calendar).toString());
+
+        // リスナーがセットされている場合、クリック時のイベントを通知する。
         if (this.mOnDateClickListener != null) {
-            this.mOnDateClickListener.onClick(view, date);
+            this.mOnDateClickListener.onDateClick(view, calendar);
         }
         return;
     }
@@ -244,6 +280,18 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
      * @return Calendarオブジェクト
      */
     private static Calendar getCalendar(int year, int month) {
+        return getCalendar(year, month, 1);
+    }
+
+    /**
+     * 引数{@code year}年、{@code month}月、{@code day}で指定したCalendarオブジェクトを生成する。
+     *
+     * @param year 年
+     * @param month 月（1〜12月）
+     * @param day 日
+     * @return Calendarオブジェクト
+     */
+    private static Calendar getCalendar(int year, int month, int day) {
         TimeZone timeZone = TimeZone.getTimeZone("Asia/Tokyo");
 
         Calendar calendar = Calendar.getInstance();
@@ -253,7 +301,7 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
 
         // 0から始まる。
         calendar.set(Calendar.MONTH, month - 1);
-        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        calendar.set(Calendar.DAY_OF_MONTH, day);
         return calendar;
     }
 }

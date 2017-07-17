@@ -2,7 +2,6 @@ package jp.dcworks.android.views.scrollmultiselectablecalendar.list;
 
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,8 +16,7 @@ import java.util.Date;
 import java.util.List;
 
 import jp.dcworks.android.views.scrollmultiselectablecalendar.R;
-import jp.dcworks.android.views.scrollmultiselectablecalendar.consts.ScheduleMode;
-import jp.dcworks.android.views.scrollmultiselectablecalendar.entity.SimpleDate;
+import jp.dcworks.android.views.scrollmultiselectablecalendar.entity.AvailableSchedule;
 
 /**
  * 月リストのアダプタ。
@@ -60,19 +58,14 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
     /** LayoutInflater */
     private LayoutInflater mLayoutInflater;
 
-    /** Calendarリストオブジェクト */
+    /** Calendarリストオブジェクト（※表示するカレンダーのリストを保持。） */
     private List<Calendar> mCalendarList;
 
-    /** スケジュールモード */
-    private ScheduleMode mScheduleMode = ScheduleMode.SINGLE;
+    /** カレンダーの状態を保持 */
+    private AvailableSchedule mAvailableSchedule;
 
     /** 年月フォーマット */
     private String mYearMonthFormat = "yyyy年MM月";
-
-    /** 初回タップ時の日付 */
-    private SimpleDate mFirstSelectedDate;
-    /** ２回目タップ時の日付 */
-    private SimpleDate mSecondSelectedDate;
 
     /**
      * 日付クリック時のイベントリスナー。
@@ -85,12 +78,12 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
         /**
          * 日付クリック時のイベントを通知する。
          *
-         * @param view クリックされたView。
-         * @param date クリックされたViewの日付。
+         * @param view クリックされたViewを通知する。
+         * @param calendar クリックされたViewのカレンダーを通知する。
          * @author tomo-sato
          * @since 1.0.0
          */
-        void onClick(View view, Date date);
+        void onDateClick(View view, Calendar calendar);
     }
 
     /** 日付クリック時のイベントリスナーのメンバ変数。 */
@@ -112,16 +105,14 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
      * コンストラクタ。
      *
      * @param context Context
-     * @param scheduleMode スケジュールモード
      * @author tomo-sato
      * @since 1.0.0
      */
-    public MonthListAdapter(Context context, ScheduleMode scheduleMode) {
+    public MonthListAdapter(Context context) {
         super();
         this.mContext = context;
         this.mLayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.mCalendarList = new ArrayList<>();
-        this.mScheduleMode = scheduleMode;
     }
 
     @Override
@@ -194,6 +185,8 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
      *
      * @param calendar 表示するカレンダー
      * @param viewHolder Viewホルダー
+     * @author tomo-sato
+     * @since 1.0.0
      */
     private void setWeekView(Calendar calendar, ViewHolder viewHolder) {
 
@@ -242,7 +235,10 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
                         continue;
                     }
 
+                    // 日付をセットする。
                     dayTextView.setText(String.valueOf(day));
+
+                    // 曜日毎にテキストカラーをセットする。
                     switch (j) {
                         // 日曜
                         case 0:
@@ -258,10 +254,55 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
                             dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.black));
                     }
 
-                    // TODO tomo-sato 【バグ】非表示部分に表示部分のクリックイベントがセットされている。
-                    // TODO tomo-sato リサイクルしていない都合、タップ状態をViewHolderに保持する必要がある。
-                    dayTextView.setOnClickListener(this);
+                    // 日付をカレンダーにセットする。
+                    calendar.set(Calendar.DATE, day);
 
+                    // 選択状態（個別選択）をセットする。
+                    if (this.mAvailableSchedule.selectedCalendarList != null && !this.mAvailableSchedule.selectedCalendarList.isEmpty()) {
+                        for (Calendar selectedCalendar : this.mAvailableSchedule.selectedCalendarList) {
+                            if (selectedCalendar.compareTo(calendar) == 0) {
+                                dayTextView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.available_day_background));
+                                dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.white));
+                            }
+                        }
+                    }
+
+                    // 選択状態（範囲選択）をセットする。
+                    if (this.mAvailableSchedule.selectedFromCalendar != null && this.mAvailableSchedule.selectedToCalendar != null) {
+
+                        if ((this.mAvailableSchedule.selectedFromCalendar != null && this.mAvailableSchedule.selectedFromCalendar.compareTo(calendar) <= 0)
+                                && (this.mAvailableSchedule.selectedToCalendar != null && this.mAvailableSchedule.selectedToCalendar.compareTo(calendar) >= 0)) {
+
+                            dayTextView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.available_day_background));
+                            dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.white));
+                        }
+
+                    } else if (this.mAvailableSchedule.selectedFromCalendar != null && this.mAvailableSchedule.selectedToCalendar == null) {
+
+                        if (this.mAvailableSchedule.selectedFromCalendar.compareTo(calendar) == 0) {
+                            dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.available_day_background));
+                        }
+                    }
+
+                    // クリックイベントをセットする。
+                    if ((this.mAvailableSchedule.selectableFromCalendar != null && this.mAvailableSchedule.selectableFromCalendar.compareTo(calendar) <= 0)
+                            && (this.mAvailableSchedule.selectableToCalendar != null && this.mAvailableSchedule.selectableToCalendar.compareTo(calendar) >= 0)) {
+
+                        dayTextView.setOnClickListener(this);
+
+                    } else if ((this.mAvailableSchedule.selectableFromCalendar != null && this.mAvailableSchedule.selectableFromCalendar.compareTo(calendar) <= 0)
+                            && (this.mAvailableSchedule.selectableToCalendar == null)) {
+
+                        dayTextView.setOnClickListener(this);
+
+                    } else if ((this.mAvailableSchedule.selectableFromCalendar == null)
+                            && (this.mAvailableSchedule.selectableToCalendar != null && this.mAvailableSchedule.selectableToCalendar.compareTo(calendar) >= 0)) {
+
+                        dayTextView.setOnClickListener(this);
+
+                    } else {
+                        dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.grey));
+                    }
                     day++;
                 }
             }
@@ -271,44 +312,6 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
 
     @Override
     public void onClick(View view) {
-
-        if(this.mScheduleMode == ScheduleMode.SINGLE) {
-            onClickAtSingleMode(view);
-        } else if(this.mScheduleMode == ScheduleMode.RANGE) {
-            onClickAsRangeMode(view);
-        } else if(this.mScheduleMode == ScheduleMode.DISPLAY) {
-            return;
-        }
-
-        // リスナーがセットされている場合、クリック時のイベントを通知する。
-        if (this.mOnDateClickListener != null) {
-            this.mOnDateClickListener.onClick(view, null);
-        }
-    }
-
-    /**
-     * シングル選択時のタップ動作。
-     * TODO tomo-sato 未実装
-     *
-     * @param view View
-     * @author tomo-sato
-     * @since 1.0.0
-     */
-    private void onClickAtSingleMode(View view) {
-        TextView dayText = (TextView) view;
-        dayText.setBackgroundColor(ContextCompat.getColor(this.mContext, R.color.available_day_background));
-        dayText.setTextColor(ContextCompat.getColor(this.mContext, R.color.white));
-    }
-
-    /**
-     * マルチ選択時のタップ動作。
-     * TODO tomo-sato 未実装
-     *
-     * @param view View
-     * @author tomo-sato
-     * @since 1.0.0
-     */
-    private void onClickAsRangeMode(View view) {
         TextView dayText = (TextView) view;
 
         // タップされた年月を取得する。
@@ -328,36 +331,17 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
         }
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
+        calendar.set(Calendar.DATE, Integer.parseInt(dayText.getText().toString()));
 
-        // TODO tomo-sato 年月暫定
-        SimpleDate simpleDate = new SimpleDate(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1, Integer.parseInt(dayText.getText().toString()));
-
-        if (this.mFirstSelectedDate == null) {
-            Log.d(TAG, simpleDate.toString());
-            this.mFirstSelectedDate = simpleDate;
-
-            dayText.setTextColor(ContextCompat.getColor(this.mContext, R.color.red));
-
-        } else {
-            Log.d(TAG, simpleDate.toString());
-            this.mSecondSelectedDate = simpleDate;
-            selectDaysByRange();
-
-            dayText.setBackgroundColor(ContextCompat.getColor(this.mContext, R.color.available_day_background));
-            dayText.setTextColor(ContextCompat.getColor(this.mContext, R.color.white));
-
+        // リスナーがセットされている場合、クリック時のイベントを通知する。
+        if (this.mOnDateClickListener != null) {
+            this.mOnDateClickListener.onDateClick(view, calendar);
         }
     }
 
     /**
-     * 範囲選択で選択状態とする。
-     */
-    private void selectDaysByRange() {
-
-    }
-
-    /**
      * リストクリア処理。
+     *
      * @author tomo-sato
      * @since 1.0.0
      */
@@ -368,6 +352,7 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
 
     /**
      * 引数に指定されたリストを追加する。
+     *
      * @param list 表示項目リスト
      * @author tomo-sato
      * @since 1.0.0
@@ -377,7 +362,19 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
     }
 
     /**
+     * 利用可能スケジュールをセットする。
+     *
+     * @param availableSchedule 利用可能スケジュール
+     * @author tomo-sato
+     * @since 1.0.0
+     */
+    public void setAvailableSchedule(AvailableSchedule availableSchedule) {
+        this.mAvailableSchedule = availableSchedule;
+    }
+
+    /**
      * ViewHolderクラス。
+     *
      * @author tomo-sato
      * @since 1.0.0
      */
