@@ -13,10 +13,12 @@ import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.List;
 import java.util.TimeZone;
 
 import jp.dcworks.android.views.scrollmultiselectablecalendar.R;
 import jp.dcworks.android.views.scrollmultiselectablecalendar.consts.ScheduleMode;
+import jp.dcworks.android.views.scrollmultiselectablecalendar.entity.AvailableSchedule;
 import jp.dcworks.android.views.scrollmultiselectablecalendar.entity.SimpleDate;
 import jp.dcworks.android.views.scrollmultiselectablecalendar.list.MonthListAdapter;
 
@@ -36,13 +38,16 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
     private Context mContext;
 
     /** スケジュールモード */
-    private ScheduleMode mScheduleMode = ScheduleMode.SINGLE;
+    private ScheduleMode mScheduleMode = ScheduleMode.DISPLAY;
 
+    /** カレンダーの状態 */
+    private AvailableSchedule mAvailableSchedule = new AvailableSchedule();
 
-    /** 表示カレンダー：開始カレンダー */
-    private Calendar mViewFromCalendar;
-    /** 表示カレンダー：終了カレンダー */
-    private Calendar mViewToCalendar;
+    /** カレンダーの状態 */
+    private List<Calendar> mViewCalendar = new ArrayList<>();
+
+    /** 月リストアダプター */
+    private MonthListAdapter mMonthListAdapter;
 
     // attributes ---------------
     /** xml属性：色設定：週バックグラウンドカラー */
@@ -85,8 +90,8 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
         /**
          * 日付クリック時のイベントを通知する。
          *
-         * @param view クリックされたView。
-         * @param calendar クリックされたViewの日付。
+         * @param view クリックされたViewを通知する。
+         * @param calendar クリックされたViewのカレンダーを通知する。
          * @author tomo-sato
          * @since 1.0.0
          */
@@ -198,29 +203,34 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
         View layout = LayoutInflater.from(this.mContext).inflate(R.layout.scroll_multi_selectable_calendar_view, this);
 
         // 表示するカレンダーのリストを生成する。
-        ArrayList<Calendar> listItem = new ArrayList<>();
-        listItem.add(getCalendar(2017, 1));
-        listItem.add(getCalendar(2017, 2));
-        listItem.add(getCalendar(2017, 3));
-        listItem.add(getCalendar(2017, 4));
-        listItem.add(getCalendar(2017, 5));
-        listItem.add(getCalendar(2017, 6));
-        listItem.add(getCalendar(2017, 7));
-        listItem.add(getCalendar(2017, 8));
-        listItem.add(getCalendar(2017, 9));
-        listItem.add(getCalendar(2017, 10));
-        listItem.add(getCalendar(2017, 11));
-        listItem.add(getCalendar(2017, 12));
+        this.mViewCalendar = new ArrayList<>();
+        this.mViewCalendar.add(getCalendar(2017, 1));
+        this.mViewCalendar.add(getCalendar(2017, 2));
+        this.mViewCalendar.add(getCalendar(2017, 3));
+        this.mViewCalendar.add(getCalendar(2017, 4));
+        this.mViewCalendar.add(getCalendar(2017, 5));
+        this.mViewCalendar.add(getCalendar(2017, 6));
+        this.mViewCalendar.add(getCalendar(2017, 7));
+        this.mViewCalendar.add(getCalendar(2017, 8));
+        this.mViewCalendar.add(getCalendar(2017, 9));
+        this.mViewCalendar.add(getCalendar(2017, 10));
+        this.mViewCalendar.add(getCalendar(2017, 11));
+        this.mViewCalendar.add(getCalendar(2017, 12));
 
-        // ListView初期化
+        this.mAvailableSchedule.selectableFromCalendar = getCalendar(2017, 1, 10);
+        this.mAvailableSchedule.selectableToCalendar = getCalendar(2017, 9, 10);
+
+
+        // ListView初期化。
         ListView listView = (ListView) findViewById(R.id.month_list);
-        MonthListAdapter monthListAdapter = new MonthListAdapter(layout.getContext(), ScheduleMode.RANGE);
-        monthListAdapter.setOnDateClickListener(this);
-        listView.setAdapter(monthListAdapter);
+        this.mMonthListAdapter = new MonthListAdapter(layout.getContext());
+        this.mMonthListAdapter.setOnDateClickListener(this);
+        listView.setAdapter(this.mMonthListAdapter);
 
-        monthListAdapter.clear();
-        monthListAdapter.addAll(listItem);
-        monthListAdapter.notifyDataSetChanged();
+        this.mMonthListAdapter.clear();
+        this.mMonthListAdapter.addAll(this.mViewCalendar);
+        this.mMonthListAdapter.setAvailableSchedule(this.mAvailableSchedule);
+        this.mMonthListAdapter.notifyDataSetChanged();
 
         return;
     }
@@ -229,10 +239,70 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
     public void onDateClick(View view, Calendar calendar) {
         Log.d(TAG, SimpleDate.toSimpleDate(calendar).toString());
 
+        if(this.mScheduleMode == ScheduleMode.SINGLE) {
+            onClickAtSingleMode(calendar);
+        } else if(this.mScheduleMode == ScheduleMode.RANGE) {
+            onClickAsRangeMode(calendar);
+        } else if(this.mScheduleMode == ScheduleMode.DISPLAY) {
+
+        }
+
+        // リスナーがセットされている場合、クリック時のイベントを通知する。
         if (this.mOnDateClickListener != null) {
             this.mOnDateClickListener.onDateClick(view, calendar);
         }
         return;
+    }
+
+    /**
+     * 単一選択モード時のクリック処理。
+     *
+     * @param calendar クリックされたカレンダーオブジェクト
+     */
+    private void onClickAtSingleMode(Calendar calendar) {
+        if (this.mAvailableSchedule.selectedCalendarList.contains(calendar)) {
+            this.mAvailableSchedule.selectedCalendarList.remove(calendar);
+        } else {
+            this.mAvailableSchedule.selectedCalendarList.add(calendar);
+        }
+
+        // TODO tomo-sato 反応が悪い。（※処理が重い。Selectorなどを指定して見た目の調整余地あり。）
+        this.mMonthListAdapter.setAvailableSchedule(this.mAvailableSchedule);
+        this.mMonthListAdapter.notifyDataSetChanged();
+    }
+
+    /**
+     * 範囲選択モード時のクリック処理。
+     *
+     * @param calendar クリックされたカレンダーオブジェクト
+     */
+    private void onClickAsRangeMode(Calendar calendar) {
+        // 初回タップの場合
+        if (this.mAvailableSchedule.selectedFromCalendar == null) {
+            this.mAvailableSchedule.selectedFromCalendar = calendar;
+
+        // 2回目以降かつ、範囲が決まっていない場合
+        } else if (this.mAvailableSchedule.selectedFromCalendar != null
+                && this.mAvailableSchedule.selectedToCalendar == null) {
+
+            // 初回タップより過去の場合セットし直し
+            if (this.mAvailableSchedule.selectedFromCalendar.compareTo(calendar) > 0) {
+                this.mAvailableSchedule.selectedFromCalendar = calendar;
+
+            // 初回タップ以降未来の場合（同じ場所をタップした場合も含む）
+            } else {
+                this.mAvailableSchedule.selectedToCalendar = calendar;
+            }
+
+        // 範囲が決まっている場合
+        } else {
+            this.mAvailableSchedule.selectedFromCalendar = calendar;
+            this.mAvailableSchedule.selectedToCalendar = null;
+        }
+
+        // TODO tomo-sato 反応が悪い。（※処理が重い。Selectorなどを指定して見た目の調整余地あり。）
+        this.mMonthListAdapter.setAvailableSchedule(this.mAvailableSchedule);
+        this.mMonthListAdapter.notifyDataSetChanged();
     }
 
     /**
@@ -243,6 +313,18 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
      * @return Calendarオブジェクト
      */
     private static Calendar getCalendar(int year, int month) {
+        return getCalendar(year, month, 1);
+    }
+
+    /**
+     * 引数{@code year}年、{@code month}月、{@code day}で指定したCalendarオブジェクトを生成する。
+     *
+     * @param year 年
+     * @param month 月（1〜12月）
+     * @param day 日
+     * @return Calendarオブジェクト
+     */
+    private static Calendar getCalendar(int year, int month, int day) {
         TimeZone timeZone = TimeZone.getTimeZone("Asia/Tokyo");
 
         Calendar calendar = Calendar.getInstance();
@@ -252,7 +334,7 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
 
         // 0から始まる。
         calendar.set(Calendar.MONTH, month - 1);
-        calendar.set(Calendar.DAY_OF_MONTH, 1);
+        calendar.set(Calendar.DAY_OF_MONTH, day);
         return calendar;
     }
 }

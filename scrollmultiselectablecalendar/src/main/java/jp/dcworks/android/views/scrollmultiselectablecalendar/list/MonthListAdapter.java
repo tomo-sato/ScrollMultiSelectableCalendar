@@ -2,7 +2,6 @@ package jp.dcworks.android.views.scrollmultiselectablecalendar.list;
 
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,8 +16,7 @@ import java.util.Date;
 import java.util.List;
 
 import jp.dcworks.android.views.scrollmultiselectablecalendar.R;
-import jp.dcworks.android.views.scrollmultiselectablecalendar.consts.ScheduleMode;
-import jp.dcworks.android.views.scrollmultiselectablecalendar.entity.SimpleDate;
+import jp.dcworks.android.views.scrollmultiselectablecalendar.entity.AvailableSchedule;
 
 /**
  * 月リストのアダプタ。
@@ -63,16 +61,12 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
     /** Calendarリストオブジェクト */
     private List<Calendar> mCalendarList;
 
-    /** スケジュールモード */
-    private ScheduleMode mScheduleMode = ScheduleMode.SINGLE;
+    /** カレンダーの状態を保持 */
+    private AvailableSchedule mAvailableSchedule;
 
     /** 年月フォーマット */
     private String mYearMonthFormat = "yyyy年MM月";
 
-    /** 初回タップ時の日付 */
-    private SimpleDate mFirstSelectedDate;
-    /** ２回目タップ時の日付 */
-    private SimpleDate mSecondSelectedDate;
 
     /**
      * 日付クリック時のイベントリスナー。
@@ -112,16 +106,14 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
      * コンストラクタ。
      *
      * @param context Context
-     * @param scheduleMode スケジュールモード
      * @author tomo-sato
      * @since 1.0.0
      */
-    public MonthListAdapter(Context context, ScheduleMode scheduleMode) {
+    public MonthListAdapter(Context context) {
         super();
         this.mContext = context;
         this.mLayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.mCalendarList = new ArrayList<>();
-        this.mScheduleMode = scheduleMode;
     }
 
     @Override
@@ -148,7 +140,7 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
 //        View view;
 //        ViewHolder viewHolder;
 
-// TODO tomo-sato リサイクルできるようなら調整する。
+// TODO tomo-sato リサイクルできるように調整の余地あり。
 //        if (convertView == null) {
             View view = this.mLayoutInflater.inflate(R.layout.inc_month, parent, false);
 
@@ -258,8 +250,60 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
                             dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.black));
                     }
 
-                    // タップイベントをセット。
-                    dayTextView.setOnClickListener(this);
+                    // 日付をカレンダーにセットする。
+                    Calendar targetCalendar = Calendar.getInstance();
+                    targetCalendar.setTime(calendar.getTime());
+                    targetCalendar.set(Calendar.DATE, day);
+
+                    // 選択状態（個別選択）をセットする。
+                    if (this.mAvailableSchedule != null) {
+                        if (this.mAvailableSchedule.selectedCalendarList != null && !this.mAvailableSchedule.selectedCalendarList.isEmpty()) {
+                            for (Calendar selectedCalendar : this.mAvailableSchedule.selectedCalendarList) {
+                                if (selectedCalendar.compareTo(targetCalendar) == 0) {
+                                    dayTextView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.available_day_background));
+                                    dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.white));
+                                }
+                            }
+                        }
+
+                        // 選択状態（範囲選択）をセットする。
+                        if (this.mAvailableSchedule.selectedFromCalendar != null && this.mAvailableSchedule.selectedToCalendar != null) {
+
+                            if ((this.mAvailableSchedule.selectedFromCalendar != null && this.mAvailableSchedule.selectedFromCalendar.compareTo(targetCalendar) <= 0)
+                                    && (this.mAvailableSchedule.selectedToCalendar != null && this.mAvailableSchedule.selectedToCalendar.compareTo(targetCalendar) >= 0)) {
+
+                                dayTextView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.available_day_background));
+                                dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.white));
+                            }
+
+                        } else if (this.mAvailableSchedule.selectedFromCalendar != null && this.mAvailableSchedule.selectedToCalendar == null) {
+
+                            if (this.mAvailableSchedule.selectedFromCalendar.compareTo(targetCalendar) == 0) {
+                                dayTextView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.grey));
+                                dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.available_day_background));
+                            }
+                        }
+
+                        // クリックイベントをセットする。
+                        if ((this.mAvailableSchedule.selectableFromCalendar != null && this.mAvailableSchedule.selectableFromCalendar.compareTo(targetCalendar) <= 0)
+                                && (this.mAvailableSchedule.selectableToCalendar != null && this.mAvailableSchedule.selectableToCalendar.compareTo(targetCalendar) >= 0)) {
+
+                            dayTextView.setOnClickListener(this);
+
+                        } else if ((this.mAvailableSchedule.selectableFromCalendar != null && this.mAvailableSchedule.selectableFromCalendar.compareTo(targetCalendar) <= 0)
+                                && (this.mAvailableSchedule.selectableToCalendar == null)) {
+
+                            dayTextView.setOnClickListener(this);
+
+                        } else if ((this.mAvailableSchedule.selectableFromCalendar == null)
+                                && (this.mAvailableSchedule.selectableToCalendar != null && this.mAvailableSchedule.selectableToCalendar.compareTo(targetCalendar) >= 0)) {
+
+                            dayTextView.setOnClickListener(this);
+
+                        } else {
+                            dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.grey));
+                        }
+                    }
                     day++;
                 }
             }
@@ -297,77 +341,8 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
     }
 
     /**
-     * シングル選択時のタップ動作。
-     * TODO tomo-sato 未実装
-     *
-     * @param view View
-     * @author tomo-sato
-     * @since 1.0.0
-     */
-    private void onClickAtSingleMode(View view) {
-        TextView dayText = (TextView) view;
-        dayText.setBackgroundColor(ContextCompat.getColor(this.mContext, R.color.available_day_background));
-        dayText.setTextColor(ContextCompat.getColor(this.mContext, R.color.white));
-    }
-
-    /**
-     * マルチ選択時のタップ動作。
-     * TODO tomo-sato 未実装
-     *
-     * @param view View
-     * @author tomo-sato
-     * @since 1.0.0
-     */
-    private void onClickAsRangeMode(View view) {
-        TextView dayText = (TextView) view;
-
-        // タップされた年月を取得する。
-        // TODO tomo-sato 親を辿っているためレイアウトに依存している。他に方法が無いか要検討。
-        ViewGroup viewWeekGroup = (ViewGroup) view.getParent();
-        ViewGroup viewLinearLayoutGroup = (ViewGroup) viewWeekGroup.getParent();
-        ViewGroup viewMonthLinearLayoutGroup = (ViewGroup) viewLinearLayoutGroup.getParent();
-        String yearMonthStr = ((TextView) viewMonthLinearLayoutGroup.findViewById(R.id.month_text_view)).getText().toString();
-
-        // TODO tomo-sato 年月取得暫定
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(this.mYearMonthFormat);
-        Date date = null;
-        try {
-            date = simpleDateFormat.parse(yearMonthStr);
-        } catch (ParseException e) {
-            e.printStackTrace();
-        }
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(date);
-
-        // TODO tomo-sato 年月暫定
-        SimpleDate simpleDate = new SimpleDate(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1, Integer.parseInt(dayText.getText().toString()));
-
-        if (this.mFirstSelectedDate == null) {
-            Log.d(TAG, simpleDate.toString());
-            this.mFirstSelectedDate = simpleDate;
-
-            dayText.setTextColor(ContextCompat.getColor(this.mContext, R.color.red));
-
-        } else {
-            Log.d(TAG, simpleDate.toString());
-            this.mSecondSelectedDate = simpleDate;
-            selectDaysByRange();
-
-            dayText.setBackgroundColor(ContextCompat.getColor(this.mContext, R.color.available_day_background));
-            dayText.setTextColor(ContextCompat.getColor(this.mContext, R.color.white));
-
-        }
-    }
-
-    /**
-     * 範囲選択で選択状態とする。
-     */
-    private void selectDaysByRange() {
-
-    }
-
-    /**
      * リストクリア処理。
+     *
      * @author tomo-sato
      * @since 1.0.0
      */
@@ -378,6 +353,7 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
 
     /**
      * 引数に指定されたリストを追加する。
+     *
      * @param list 表示項目リスト
      * @author tomo-sato
      * @since 1.0.0
@@ -387,19 +363,38 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
     }
 
     /**
+     * 利用可能スケジュールをセットする。
+     *
+     * @param availableSchedule 利用可能スケジュール
+     * @author tomo-sato
+     * @since 1.0.0
+     */
+    public void setAvailableSchedule(AvailableSchedule availableSchedule) {
+        this.mAvailableSchedule = availableSchedule;
+    }
+
+    /**
      * ViewHolderクラス。
+     *
      * @author tomo-sato
      * @since 1.0.0
      */
     private static class ViewHolder {
         /** 年月 */
         TextView monthTextView;
-
         /** 各週 */
         List<WeekViewSet> weekViewSetList = new ArrayList<>();
 
+        /**
+         * 1週間のView情報を保持するクラス。
+         *
+         * @author tomo-sato
+         * @since 1.0.0
+         */
         private static class WeekViewSet {
+            /** 週 */
             View weekView;
+            /** 1週間の日リスト */
             List<TextView> dayTextViewList = new ArrayList<>();
         }
     }

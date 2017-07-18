@@ -4,6 +4,12 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
 
+/**
+ * スケジュールエンティティクラス。
+ *
+ * @author tomo-sato
+ * @since 1.0.0
+ */
 public class AvailableSchedule {
 
     /** 選択可能範囲：開始カレンダー */
