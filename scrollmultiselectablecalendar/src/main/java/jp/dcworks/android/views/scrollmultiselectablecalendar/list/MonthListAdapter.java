@@ -58,7 +58,7 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
     /** LayoutInflater */
     private LayoutInflater mLayoutInflater;
 
-    /** Calendarリストオブジェクト */
+    /** Calendarリストオブジェクト（※表示するカレンダーのリストを保持。） */
     private List<Calendar> mCalendarList;
 
     /** カレンダーの状態を保持 */
@@ -79,8 +79,8 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
         /**
          * 日付クリック時のイベントを通知する。
          *
-         * @param view クリックされたView。
-         * @param calendar クリックされたViewの日付。
+         * @param view クリックされたViewを通知する。
+         * @param calendar クリックされたViewのカレンダーを通知する。
          * @author tomo-sato
          * @since 1.0.0
          */
@@ -186,6 +186,8 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
      *
      * @param calendar 表示するカレンダー
      * @param viewHolder Viewホルダー
+     * @author tomo-sato
+     * @since 1.0.0
      */
     private void setWeekView(Calendar calendar, ViewHolder viewHolder) {
 
@@ -234,7 +236,10 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
                         continue;
                     }
 
+                    // 日付をセットする。
                     dayTextView.setText(String.valueOf(day));
+
+                    // 曜日毎にテキストカラーをセットする。
                     switch (j) {
                         // 日曜
                         case 0:

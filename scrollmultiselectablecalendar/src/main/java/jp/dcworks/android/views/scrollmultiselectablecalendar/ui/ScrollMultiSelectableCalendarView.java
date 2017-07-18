@@ -220,7 +220,6 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
         this.mAvailableSchedule.selectableFromCalendar = getCalendar(2017, 1, 10);
         this.mAvailableSchedule.selectableToCalendar = getCalendar(2017, 9, 10);
 
-
         // ListView初期化。
         ListView listView = (ListView) findViewById(R.id.month_list);
         this.mMonthListAdapter = new MonthListAdapter(layout.getContext());
