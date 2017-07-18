@@ -21,6 +21,10 @@ public class SimpleDate {
         return calendar;
     }
 
+    public static SimpleDate toSimpleDate(Calendar calendar) {
+        return new SimpleDate(calendar.get(Calendar.YEAR), calendar.get(Calendar.MONTH) + 1, calendar.get(Calendar.DATE));
+    }
+
     @Override
     public String toString() {
         return this.year + "/" + this.month + "/" + this.day;

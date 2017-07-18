@@ -5,6 +5,7 @@ import android.content.res.TypedArray;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -12,11 +13,11 @@ import android.widget.ListView;
 
 import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.Date;
 import java.util.TimeZone;
 
 import jp.dcworks.android.views.scrollmultiselectablecalendar.R;
 import jp.dcworks.android.views.scrollmultiselectablecalendar.consts.ScheduleMode;
+import jp.dcworks.android.views.scrollmultiselectablecalendar.entity.SimpleDate;
 import jp.dcworks.android.views.scrollmultiselectablecalendar.list.MonthListAdapter;
 
 /**
@@ -85,11 +86,11 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
          * 日付クリック時のイベントを通知する。
          *
          * @param view クリックされたView。
-         * @param date クリックされたViewの日付。
+         * @param calendar クリックされたViewの日付。
          * @author tomo-sato
          * @since 1.0.0
          */
-        public void onClick(View view, Date date);
+        void onDateClick(View view, Calendar calendar);
     };
 
     /** 日付クリック時のイベントリスナーのメンバ変数。 */
@@ -211,8 +212,10 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
         listItem.add(getCalendar(2017, 11));
         listItem.add(getCalendar(2017, 12));
 
+        // ListView初期化
         ListView listView = (ListView) findViewById(R.id.month_list);
         MonthListAdapter monthListAdapter = new MonthListAdapter(layout.getContext(), ScheduleMode.RANGE);
+        monthListAdapter.setOnDateClickListener(this);
         listView.setAdapter(monthListAdapter);
 
         monthListAdapter.clear();
@@ -222,16 +225,12 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
         return;
     }
 
-    /**
-     * 日付クリック時のイベントを通知する。
-     *
-     * @param view クリックされたView。
-     * @param date クリックされたViewの日付。
-     */
     @Override
-    public void onClick(View view, Date date) {
+    public void onDateClick(View view, Calendar calendar) {
+        Log.d(TAG, SimpleDate.toSimpleDate(calendar).toString());
+
         if (this.mOnDateClickListener != null) {
-            this.mOnDateClickListener.onClick(view, date);
+            this.mOnDateClickListener.onDateClick(view, calendar);
         }
         return;
     }

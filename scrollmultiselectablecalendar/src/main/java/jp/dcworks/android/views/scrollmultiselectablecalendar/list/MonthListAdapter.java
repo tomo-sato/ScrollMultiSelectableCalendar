@@ -86,11 +86,11 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
          * 日付クリック時のイベントを通知する。
          *
          * @param view クリックされたView。
-         * @param date クリックされたViewの日付。
+         * @param calendar クリックされたViewの日付。
          * @author tomo-sato
          * @since 1.0.0
          */
-        void onClick(View view, Date date);
+        void onDateClick(View view, Calendar calendar);
     }
 
     /** 日付クリック時のイベントリスナーのメンバ変数。 */
@@ -258,10 +258,8 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
                             dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.black));
                     }
 
-                    // TODO tomo-sato 【バグ】非表示部分に表示部分のクリックイベントがセットされている。
-                    // TODO tomo-sato リサイクルしていない都合、タップ状態をViewHolderに保持する必要がある。
+                    // タップイベントをセット。
                     dayTextView.setOnClickListener(this);
-
                     day++;
                 }
             }
@@ -271,18 +269,30 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
 
     @Override
     public void onClick(View view) {
+        TextView dayText = (TextView) view;
 
-        if(this.mScheduleMode == ScheduleMode.SINGLE) {
-            onClickAtSingleMode(view);
-        } else if(this.mScheduleMode == ScheduleMode.RANGE) {
-            onClickAsRangeMode(view);
-        } else if(this.mScheduleMode == ScheduleMode.DISPLAY) {
-            return;
+        // タップされた年月を取得する。
+        // TODO tomo-sato 親を辿っているためレイアウトに依存している。他に方法が無いか要検討。
+        ViewGroup viewWeekGroup = (ViewGroup) view.getParent();
+        ViewGroup viewLinearLayoutGroup = (ViewGroup) viewWeekGroup.getParent();
+        ViewGroup viewMonthLinearLayoutGroup = (ViewGroup) viewLinearLayoutGroup.getParent();
+        String yearMonthStr = ((TextView) viewMonthLinearLayoutGroup.findViewById(R.id.month_text_view)).getText().toString();
+
+        // TODO tomo-sato 年月取得暫定
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(this.mYearMonthFormat);
+        Date date = null;
+        try {
+            date = simpleDateFormat.parse(yearMonthStr);
+        } catch (ParseException e) {
+            e.printStackTrace();
         }
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.DATE, Integer.parseInt(dayText.getText().toString()));
 
         // リスナーがセットされている場合、クリック時のイベントを通知する。
         if (this.mOnDateClickListener != null) {
-            this.mOnDateClickListener.onClick(view, null);
+            this.mOnDateClickListener.onDateClick(view, calendar);
         }
     }
 
