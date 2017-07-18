@@ -37,8 +37,8 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
     /** コンテキスト */
     private Context mContext;
 
-    /** スケジュールモード */
-    private ScheduleMode mScheduleMode = ScheduleMode.DISPLAY;
+    /** スケジュールモード：デフォルト範囲選択 */
+    private ScheduleMode mScheduleMode = ScheduleMode.RANGE;
 
     /** カレンダーの状態 */
     private AvailableSchedule mAvailableSchedule = new AvailableSchedule();
