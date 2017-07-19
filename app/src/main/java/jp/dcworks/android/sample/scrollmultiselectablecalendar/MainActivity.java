@@ -2,13 +2,22 @@ package jp.dcworks.android.sample.scrollmultiselectablecalendar;
 
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.view.View;
+import android.widget.Toast;
 
 import java.util.Calendar;
 import java.util.TimeZone;
 
 import jp.dcworks.android.views.scrollmultiselectablecalendar.entity.AvailableSchedule;
+import jp.dcworks.android.views.scrollmultiselectablecalendar.entity.SimpleDate;
 import jp.dcworks.android.views.scrollmultiselectablecalendar.ui.ScrollMultiSelectableCalendarView;
 
+/**
+ * ScrollMultiSelectableCalendarViewサンプルActivity。
+ *
+ * @author tomo-sato
+ * @since 1.0.0
+ */
 public class MainActivity extends AppCompatActivity {
 
     @Override
@@ -32,6 +41,23 @@ public class MainActivity extends AppCompatActivity {
         availableSchedule.selectableFromCalendar = getCalendar(2017, 1, 10);
         availableSchedule.selectableToCalendar = getCalendar(2017, 5, 10);
         calendarView.setAvailableSchedule(availableSchedule);
+
+        // クリックイベントをセットする。
+        calendarView.setOnDateClickListener(new ScrollMultiSelectableCalendarView.OnDateClickListener() {
+            @Override
+            public void onDateClick(View view, Calendar calendar) {
+                Toast.makeText(MainActivity.this,
+                        SimpleDate.toSimpleDate(calendar).toString(),
+                        Toast.LENGTH_SHORT).show();
+            }
+
+            @Override
+            public void onFixedRange(Calendar fromCalendar, Calendar toCalendar) {
+                Toast.makeText(MainActivity.this,
+                        SimpleDate.toSimpleDate(fromCalendar).toString() + "〜" + SimpleDate.toSimpleDate(toCalendar).toString(),
+                        Toast.LENGTH_LONG).show();
+            }
+        });
     }
 
     /**

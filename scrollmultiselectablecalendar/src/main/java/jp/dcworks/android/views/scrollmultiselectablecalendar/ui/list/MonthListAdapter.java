@@ -1,4 +1,4 @@
-package jp.dcworks.android.views.scrollmultiselectablecalendar.list;
+package jp.dcworks.android.views.scrollmultiselectablecalendar.ui.list;
 
 import android.content.Context;
 import android.support.v4.content.ContextCompat;
