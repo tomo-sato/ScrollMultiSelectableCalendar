@@ -2,10 +2,10 @@ package jp.dcworks.android.views.scrollmultiselectablecalendar.ui;
 
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.Color;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -18,7 +18,7 @@ import java.util.List;
 import jp.dcworks.android.views.scrollmultiselectablecalendar.R;
 import jp.dcworks.android.views.scrollmultiselectablecalendar.consts.ScheduleMode;
 import jp.dcworks.android.views.scrollmultiselectablecalendar.entity.AvailableSchedule;
-import jp.dcworks.android.views.scrollmultiselectablecalendar.entity.SimpleDate;
+import jp.dcworks.android.views.scrollmultiselectablecalendar.entity.ColorSet;
 import jp.dcworks.android.views.scrollmultiselectablecalendar.ui.list.MonthListAdapter;
 
 /**
@@ -28,10 +28,6 @@ import jp.dcworks.android.views.scrollmultiselectablecalendar.ui.list.MonthListA
  * @since 1.0.0
  */
 public class ScrollMultiSelectableCalendarView extends LinearLayout implements MonthListAdapter.OnDateClickListener {
-
-    /** TAG */
-    private static final String TAG = ScrollMultiSelectableCalendarView.class.getSimpleName();
-
 
     /** コンテキスト */
     private Context mContext;
@@ -48,34 +44,10 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
     /** 月リストアダプター */
     private MonthListAdapter mMonthListAdapter;
 
+
     // attributes ---------------
-    /** xml属性：色設定：週バックグラウンドカラー */
-    private int mWeekBackgroundColor;
-    /** xml属性：色設定：週テキストカラー */
-    private int mWeekTextColor;
-
-    /** xml属性：色設定：年月バックグラウンドカラー */
-    private int mMonthBackgroundColor;
-    /** xml属性：色設定：年月テキストカラー */
-    private int mMonthTextColor;
-
-    /** xml属性：色設定：日バックグラウンドカラー */
-    private int mDayBackgroundColor;
-    /** xml属性：色設定：日テキストカラー */
-    private int mDayTextColor;
-
-    /** xml属性：色設定：日（選択）バックグラウンドカラー */
-    private int mAvailableDayBackgroundColor;
-    /** xml属性：色設定：日（選択）テキストカラー */
-    private int mAvailableDayTextColor;
-
-    /** xml属性：色設定：日（除外）バックグラウンドカラー */
-    private int mUnavailableDayBackgroundColor;
-    /** xml属性：色設定：日（除外）テキストカラー */
-    private int mUnavailableDayTextColor;
-
-    /** xml属性：色設定：日（選択不可）テキストカラー */
-    private int mDisableDayTextColor;
+    /** カレンダー色情報 */
+    private ColorSet mColorSet;
 
 
     /**
@@ -105,7 +77,7 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
          * @since 1.0.0
          */
         void onFixedRange(Calendar fromCalendar, Calendar toCalendar);
-    };
+    }
 
     /** 日付クリック時のイベントリスナーのメンバ変数。 */
     private OnDateClickListener mOnDateClickListener;
@@ -159,6 +131,7 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
 
         // 初期化処理
         this.mContext = context;
+        this.mColorSet = new ColorSet(context);
         setAttributes(attrs);
         createViews();
     }
@@ -210,35 +183,23 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
      * @since 1.0.0
      */
     private void setAttributes(AttributeSet attrs) {
-        // 属性デフォルト設定
-        mWeekBackgroundColor               = ContextCompat.getColor(this.mContext, R.color.white);
-        mWeekTextColor                     = ContextCompat.getColor(this.mContext, R.color.text_color);
-        mMonthBackgroundColor              = ContextCompat.getColor(this.mContext, R.color.default_background_month);
-        mMonthTextColor                    = ContextCompat.getColor(this.mContext, R.color.text_color);
-        mDayBackgroundColor                = ContextCompat.getColor(this.mContext, R.color.white);
-        mDayTextColor                      = ContextCompat.getColor(this.mContext, R.color.text_color);
-        mAvailableDayBackgroundColor       = ContextCompat.getColor(this.mContext, R.color.available_day_background);
-        mAvailableDayTextColor             = ContextCompat.getColor(this.mContext, R.color.white);
-        mUnavailableDayBackgroundColor     = ContextCompat.getColor(this.mContext, R.color.unavailable_day_background);
-        mUnavailableDayTextColor           = ContextCompat.getColor(this.mContext, R.color.text_color);
-        mDisableDayTextColor               = ContextCompat.getColor(this.mContext, R.color.grey);
-
         if (attrs != null) {
-            TypedArray typedArray          = this.mContext.obtainStyledAttributes(attrs, R.styleable.ScrollMultiSelectableCalendarView);
-            mWeekBackgroundColor           = typedArray.getColor(R.styleable.ScrollMultiSelectableCalendarView_weekBackgroundColor,           ContextCompat.getColor(this.mContext, R.color.white));
-            mWeekTextColor                 = typedArray.getColor(R.styleable.ScrollMultiSelectableCalendarView_weekTextColor,                 ContextCompat.getColor(this.mContext, R.color.text_color));
-            mMonthBackgroundColor          = typedArray.getColor(R.styleable.ScrollMultiSelectableCalendarView_monthBackgroundColor,          ContextCompat.getColor(this.mContext, R.color.default_background_month));
-            mMonthTextColor                = typedArray.getColor(R.styleable.ScrollMultiSelectableCalendarView_monthTextColor,                ContextCompat.getColor(this.mContext, R.color.text_color));
-            mDayBackgroundColor            = typedArray.getColor(R.styleable.ScrollMultiSelectableCalendarView_dayBackgroundColor,            ContextCompat.getColor(this.mContext, R.color.white));
-            mDayTextColor                  = typedArray.getColor(R.styleable.ScrollMultiSelectableCalendarView_dayTextColor,                  ContextCompat.getColor(this.mContext, R.color.text_color));
-            mAvailableDayBackgroundColor   = typedArray.getColor(R.styleable.ScrollMultiSelectableCalendarView_availableDayBackgroundColor,   ContextCompat.getColor(this.mContext, R.color.available_day_background));
-            mAvailableDayTextColor         = typedArray.getColor(R.styleable.ScrollMultiSelectableCalendarView_availableDayTextColor,         ContextCompat.getColor(this.mContext, R.color.white));
-            mUnavailableDayBackgroundColor = typedArray.getColor(R.styleable.ScrollMultiSelectableCalendarView_unavailableDayBackgroundColor, ContextCompat.getColor(this.mContext, R.color.unavailable_day_background));
-            mUnavailableDayTextColor       = typedArray.getColor(R.styleable.ScrollMultiSelectableCalendarView_unavailableDayTextColor,       ContextCompat.getColor(this.mContext, R.color.text_color));
-            mDisableDayTextColor           = typedArray.getColor(R.styleable.ScrollMultiSelectableCalendarView_disableDayTextColor,           ContextCompat.getColor(this.mContext, R.color.grey));
+            TypedArray typedArray                           = this.mContext.obtainStyledAttributes(attrs, R.styleable.ScrollMultiSelectableCalendarView);
+            this.mColorSet.monthTextColor                   = typedArray.getColor(R.styleable.ScrollMultiSelectableCalendarView_monthTextColor,                   ContextCompat.getColor(this.mContext, R.color.default_text_color));
+            this.mColorSet.dayTextColor                     = typedArray.getColor(R.styleable.ScrollMultiSelectableCalendarView_dayTextColor,                     ContextCompat.getColor(this.mContext, R.color.default_text_color));
+            this.mColorSet.dayWeekendTextColor              = typedArray.getColor(R.styleable.ScrollMultiSelectableCalendarView_dayWeekendTextColor,              ContextCompat.getColor(this.mContext, R.color.blue));
+            this.mColorSet.daySundayTextColor               = typedArray.getColor(R.styleable.ScrollMultiSelectableCalendarView_daySundayTextColor,               ContextCompat.getColor(this.mContext, R.color.red));
+
+            this.mColorSet.availableDayBackgroundColor      = typedArray.getColor(R.styleable.ScrollMultiSelectableCalendarView_availableDayBackgroundColor,      ContextCompat.getColor(this.mContext, R.color.available_day_background));
+            this.mColorSet.availableDayBackgroundColorAlpha = typedArray.getColor(R.styleable.ScrollMultiSelectableCalendarView_availableDayBackgroundColorAlpha, ContextCompat.getColor(this.mContext, R.color.available_day_background_alpha));
+            this.mColorSet.availableDayTextColor            = typedArray.getColor(R.styleable.ScrollMultiSelectableCalendarView_availableDayTextColor,            ContextCompat.getColor(this.mContext, R.color.white));
+
+            this.mColorSet.clickedDayBackgroundColor        = typedArray.getColor(R.styleable.ScrollMultiSelectableCalendarView_clickedDayBackgroundColor,        ContextCompat.getColor(this.mContext, R.color.clicked_day_background));
+            this.mColorSet.clickedDayTextColor              = typedArray.getColor(R.styleable.ScrollMultiSelectableCalendarView_clickedDayTextColor,              ContextCompat.getColor(this.mContext, R.color.default_text_color));
+
+            this.mColorSet.disableDayTextColor              = typedArray.getColor(R.styleable.ScrollMultiSelectableCalendarView_disableDayTextColor,              ContextCompat.getColor(this.mContext, R.color.grey));
             typedArray.recycle();
         }
-        return;
     }
 
     /**
@@ -252,33 +213,29 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
 
         // ListView初期化。
         ListView listView = (ListView) findViewById(R.id.month_list);
-        this.mMonthListAdapter = new MonthListAdapter(layout.getContext());
+        listView.setCacheColorHint(Color.BLACK);
+        this.mMonthListAdapter = new MonthListAdapter(layout.getContext(), this.mColorSet);
         this.mMonthListAdapter.setOnDateClickListener(this);
         listView.setAdapter(this.mMonthListAdapter);
 
         // 再描画処理
         this.redraw();
-
-        return;
     }
 
     @Override
     public void onDateClick(View view, Calendar calendar) {
-        Log.d(TAG, SimpleDate.toSimpleDate(calendar).toString());
-
-        if(this.mScheduleMode == ScheduleMode.SINGLE) {
+        if (this.mScheduleMode == ScheduleMode.SINGLE) {
             onClickAtSingleMode(calendar);
-        } else if(this.mScheduleMode == ScheduleMode.RANGE) {
+        } else if (this.mScheduleMode == ScheduleMode.RANGE) {
             onClickAsRangeMode(calendar);
-        } else if(this.mScheduleMode == ScheduleMode.DISPLAY) {
-
+        } else if (this.mScheduleMode == ScheduleMode.DISPLAY) {
+            return;
         }
 
         // リスナーがセットされている場合、クリック時のイベントを通知する。
         if (this.mOnDateClickListener != null) {
             this.mOnDateClickListener.onDateClick(view, calendar);
         }
-        return;
     }
 
     /**
@@ -312,8 +269,7 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
             this.mAvailableSchedule.selectedFromCalendar = calendar;
 
         // 2回目以降かつ、範囲が決まっていない場合
-        } else if (this.mAvailableSchedule.selectedFromCalendar != null
-                && this.mAvailableSchedule.selectedToCalendar == null) {
+        } else if (this.mAvailableSchedule.selectedToCalendar == null) {
 
             // 初回タップより過去の場合セットし直し
             if (this.mAvailableSchedule.selectedFromCalendar.compareTo(calendar) > 0) {

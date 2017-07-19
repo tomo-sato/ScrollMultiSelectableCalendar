@@ -1,7 +1,6 @@
 package jp.dcworks.android.views.scrollmultiselectablecalendar.ui.list;
 
 import android.content.Context;
-import android.support.v4.content.ContextCompat;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -17,6 +16,7 @@ import java.util.List;
 
 import jp.dcworks.android.views.scrollmultiselectablecalendar.R;
 import jp.dcworks.android.views.scrollmultiselectablecalendar.entity.AvailableSchedule;
+import jp.dcworks.android.views.scrollmultiselectablecalendar.entity.ColorSet;
 
 /**
  * 月リストのアダプタ。
@@ -25,10 +25,6 @@ import jp.dcworks.android.views.scrollmultiselectablecalendar.entity.AvailableSc
  * @since 1.0.0
  */
 public class MonthListAdapter extends BaseAdapter implements View.OnClickListener {
-
-    /** TAG */
-    private static final String TAG = MonthListAdapter.class.getSimpleName();
-
 
     /** 週ResourcesID配列 */
     private static final int[] INCLUDE_WEEK_RESOURCES_ID_ARRAY = {
@@ -66,6 +62,9 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
 
     /** 年月フォーマット */
     private String mYearMonthFormat = "yyyy年MM月";
+
+    /** カレンダー色情報 */
+    private ColorSet mColorSet;
 
 
     /**
@@ -106,12 +105,14 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
      * コンストラクタ。
      *
      * @param context Context
+     * @param colorSet カレンダー色情報
      * @author tomo-sato
      * @since 1.0.0
      */
-    public MonthListAdapter(Context context) {
+    public MonthListAdapter(Context context, ColorSet colorSet) {
         super();
         this.mContext = context;
+        this.mColorSet = colorSet;
         this.mLayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         this.mCalendarList = new ArrayList<>();
     }
@@ -179,6 +180,7 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
 
         // 年月をセット
         viewHolder.monthTextView.setText(simpleDateFormat.format(calendar.getTime()));
+        viewHolder.monthTextView.setTextColor(this.mColorSet.monthTextColor);
 
         // 日をセット
         setWeekView(calendar, viewHolder);
@@ -248,16 +250,17 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
                     switch (j) {
                         // 日曜
                         case 0:
-                            dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.red));
+                            dayTextView.setTextColor(this.mColorSet.daySundayTextColor);
                             break;
 
                         // 土曜
                         case 6:
-                            dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.blue));
+                            dayTextView.setTextColor(this.mColorSet.dayWeekendTextColor);
                             break;
 
+                        // 平日
                         default:
-                            dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.black));
+                            dayTextView.setTextColor(this.mColorSet.dayTextColor);
                     }
 
                     // 日付をカレンダーにセットする。
@@ -270,8 +273,8 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
                         if (this.mAvailableSchedule.selectedCalendarList != null && !this.mAvailableSchedule.selectedCalendarList.isEmpty()) {
                             for (Calendar selectedCalendar : this.mAvailableSchedule.selectedCalendarList) {
                                 if (selectedCalendar.compareTo(targetCalendar) == 0) {
-                                    dayTextView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.available_day_background));
-                                    dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.white));
+                                    dayTextView.setBackgroundColor(this.mColorSet.availableDayBackgroundColor);
+                                    dayTextView.setTextColor(this.mColorSet.availableDayTextColor);
                                 }
                             }
                         }
@@ -282,15 +285,21 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
                             if ((this.mAvailableSchedule.selectedFromCalendar != null && this.mAvailableSchedule.selectedFromCalendar.compareTo(targetCalendar) <= 0)
                                     && (this.mAvailableSchedule.selectedToCalendar != null && this.mAvailableSchedule.selectedToCalendar.compareTo(targetCalendar) >= 0)) {
 
-                                dayTextView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.available_day_background));
-                                dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.white));
+                                if (!(this.mAvailableSchedule.selectedFromCalendar.compareTo(targetCalendar) == 0
+                                        || this.mAvailableSchedule.selectedToCalendar.compareTo(targetCalendar) == 0)) {
+
+                                    dayTextView.setBackgroundColor(this.mColorSet.availableDayBackgroundColorAlpha);
+                                } else {
+                                    dayTextView.setBackgroundColor(this.mColorSet.availableDayBackgroundColor);
+                                }
+                                dayTextView.setTextColor(this.mColorSet.availableDayTextColor);
                             }
 
                         } else if (this.mAvailableSchedule.selectedFromCalendar != null && this.mAvailableSchedule.selectedToCalendar == null) {
 
                             if (this.mAvailableSchedule.selectedFromCalendar.compareTo(targetCalendar) == 0) {
-                                dayTextView.setBackgroundColor(ContextCompat.getColor(mContext, R.color.grey));
-                                dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.available_day_background));
+                                dayTextView.setBackgroundColor(this.mColorSet.clickedDayBackgroundColor);
+                                dayTextView.setTextColor(this.mColorSet.clickedDayTextColor);
                             }
                         }
 
@@ -311,14 +320,13 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
                             dayTextView.setOnClickListener(this);
 
                         } else {
-                            dayTextView.setTextColor(ContextCompat.getColor(mContext, R.color.grey));
+                            dayTextView.setTextColor(this.mColorSet.disableDayTextColor);
                         }
                     }
                     day++;
                 }
             }
         }
-        return;
     }
 
     @Override
