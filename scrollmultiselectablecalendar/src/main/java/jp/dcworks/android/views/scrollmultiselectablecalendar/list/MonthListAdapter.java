@@ -135,6 +135,11 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
     }
 
     @Override
+    public boolean isEnabled(int position) {
+        return false;
+    }
+
+    @Override
     public View getView(int position, View convertView, ViewGroup parent) {
 
 //        View view;

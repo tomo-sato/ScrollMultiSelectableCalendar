@@ -14,7 +14,6 @@ import android.widget.ListView;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
-import java.util.TimeZone;
 
 import jp.dcworks.android.views.scrollmultiselectablecalendar.R;
 import jp.dcworks.android.views.scrollmultiselectablecalendar.consts.ScheduleMode;
@@ -43,7 +42,7 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
     /** カレンダーの状態 */
     private AvailableSchedule mAvailableSchedule = new AvailableSchedule();
 
-    /** カレンダーの状態 */
+    /** 表示するカレンダーのリスト */
     private List<Calendar> mViewCalendar = new ArrayList<>();
 
     /** 月リストアダプター */
@@ -155,6 +154,49 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
     }
 
     /**
+     * スケジュールエンティティクラスを返す。
+     *
+     * @return スケジュールエンティティクラスを返す。
+     * @author tomo-sato
+     * @since 1.0.0
+     */
+    public AvailableSchedule getAvailableSchedule() {
+        return this.mAvailableSchedule;
+    }
+
+    /**
+     * スケジュールエンティティクラスをセットする。
+     *
+     * @param availableSchedule スケジュールエンティティクラス。
+     * @author tomo-sato
+     * @since 1.0.0
+     */
+    public void setAvailableSchedule(AvailableSchedule availableSchedule) {
+        this.mAvailableSchedule = availableSchedule;
+
+        this.mMonthListAdapter.clear();
+        this.mMonthListAdapter.addAll(this.mViewCalendar);
+        this.mMonthListAdapter.setAvailableSchedule(this.mAvailableSchedule);
+        this.mMonthListAdapter.notifyDataSetChanged();
+    }
+
+    /**
+     * 表示するカレンダーをセットする。
+     *
+     * @param calendar 表示するカレンダーをセットする。
+     * @author tomo-sato
+     * @since 1.0.0
+     */
+    public void addViewCalendar(Calendar calendar) {
+        this.mViewCalendar.add(calendar);
+
+        this.mMonthListAdapter.clear();
+        this.mMonthListAdapter.addAll(this.mViewCalendar);
+        this.mMonthListAdapter.setAvailableSchedule(this.mAvailableSchedule);
+        this.mMonthListAdapter.notifyDataSetChanged();
+    }
+
+    /**
      * 属性をセットする。
      *
      * @param attrs 属性（{@code AttributeSet}が{@code null}の場合、デフォルト値で初期化する。）
@@ -201,24 +243,6 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
      */
     private void createViews() {
         View layout = LayoutInflater.from(this.mContext).inflate(R.layout.scroll_multi_selectable_calendar_view, this);
-
-        // 表示するカレンダーのリストを生成する。
-        this.mViewCalendar = new ArrayList<>();
-        this.mViewCalendar.add(getCalendar(2017, 1));
-        this.mViewCalendar.add(getCalendar(2017, 2));
-        this.mViewCalendar.add(getCalendar(2017, 3));
-        this.mViewCalendar.add(getCalendar(2017, 4));
-        this.mViewCalendar.add(getCalendar(2017, 5));
-        this.mViewCalendar.add(getCalendar(2017, 6));
-        this.mViewCalendar.add(getCalendar(2017, 7));
-        this.mViewCalendar.add(getCalendar(2017, 8));
-        this.mViewCalendar.add(getCalendar(2017, 9));
-        this.mViewCalendar.add(getCalendar(2017, 10));
-        this.mViewCalendar.add(getCalendar(2017, 11));
-        this.mViewCalendar.add(getCalendar(2017, 12));
-
-        this.mAvailableSchedule.selectableFromCalendar = getCalendar(2017, 1, 10);
-        this.mAvailableSchedule.selectableToCalendar = getCalendar(2017, 9, 10);
 
         // ListView初期化。
         ListView listView = (ListView) findViewById(R.id.month_list);
@@ -302,38 +326,5 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
         // TODO tomo-sato 反応が悪い。（※処理が重い。Selectorなどを指定して見た目の調整余地あり。）
         this.mMonthListAdapter.setAvailableSchedule(this.mAvailableSchedule);
         this.mMonthListAdapter.notifyDataSetChanged();
-    }
-
-    /**
-     * 引数{@code year}年、{@code month}月で指定したCalendarオブジェクトを生成する。
-     *
-     * @param year 年
-     * @param month 月（1〜12月）
-     * @return Calendarオブジェクト
-     */
-    private static Calendar getCalendar(int year, int month) {
-        return getCalendar(year, month, 1);
-    }
-
-    /**
-     * 引数{@code year}年、{@code month}月、{@code day}で指定したCalendarオブジェクトを生成する。
-     *
-     * @param year 年
-     * @param month 月（1〜12月）
-     * @param day 日
-     * @return Calendarオブジェクト
-     */
-    private static Calendar getCalendar(int year, int month, int day) {
-        TimeZone timeZone = TimeZone.getTimeZone("Asia/Tokyo");
-
-        Calendar calendar = Calendar.getInstance();
-        calendar.clear();
-        calendar.setTimeZone(timeZone);
-        calendar.set(Calendar.YEAR, year);
-
-        // 0から始まる。
-        calendar.set(Calendar.MONTH, month - 1);
-        calendar.set(Calendar.DAY_OF_MONTH, day);
-        return calendar;
     }
 }
