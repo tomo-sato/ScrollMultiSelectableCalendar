@@ -1,6 +1,10 @@
 package jp.dcworks.android.views.scrollmultiselectablecalendar.ui.list;
 
 import android.content.Context;
+import android.graphics.drawable.Drawable;
+import android.graphics.drawable.GradientDrawable;
+import android.graphics.drawable.LayerDrawable;
+import android.os.Build;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -115,6 +119,13 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
         mColorSet = colorSet;
         mLayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mCalendarList = new ArrayList<>();
+
+        // リソースの色を設定する。
+        setDrawableResourceBackgroundColor(R.drawable.layer_available_day,       colorSet.availableDayBackgroundColor);
+        setDrawableResourceBackgroundColor(R.drawable.layer_available_day_from,  colorSet.availableDayBackgroundColor);
+        setDrawableResourceBackgroundColor(R.drawable.layer_available_day_to,    colorSet.availableDayBackgroundColor);
+        setDrawableResourceBackgroundColor(R.drawable.layer_available_day_alpha, colorSet.availableDayBackgroundColorAlpha);
+        setDrawableResourceBackgroundColor(R.drawable.layer_clicked_day,         colorSet.clickedDayBackgroundColor);
     }
 
     @Override
@@ -304,12 +315,12 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
                     targetCalendar.setTime(calendar.getTime());
                     targetCalendar.set(Calendar.DATE, day);
 
-                    // 選択状態（個別選択）をセットする。
                     if (mAvailableSchedule != null) {
+                        // 選択状態（個別選択）をセットする。
                         if (mAvailableSchedule.selectedCalendarList != null && !mAvailableSchedule.selectedCalendarList.isEmpty()) {
                             for (Calendar selectedCalendar : mAvailableSchedule.selectedCalendarList) {
                                 if (selectedCalendar.compareTo(targetCalendar) == 0) {
-                                    dayTextView.setBackgroundColor(mColorSet.availableDayBackgroundColor);
+                                    dayTextView.setBackgroundResource(R.drawable.layer_available_day);
                                     dayTextView.setTextColor(mColorSet.availableDayTextColor);
                                 }
                             }
@@ -318,23 +329,41 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
                         // 選択状態（範囲選択）をセットする。
                         if (mAvailableSchedule.selectedFromCalendar != null && mAvailableSchedule.selectedToCalendar != null) {
 
+                            // 範囲選択が決定したときの色をセットする。
                             if ((mAvailableSchedule.selectedFromCalendar != null && mAvailableSchedule.selectedFromCalendar.compareTo(targetCalendar) <= 0)
                                     && (mAvailableSchedule.selectedToCalendar != null && mAvailableSchedule.selectedToCalendar.compareTo(targetCalendar) >= 0)) {
 
+                                // 開始日、終了日の間の色をセットする。
                                 if (!(mAvailableSchedule.selectedFromCalendar.compareTo(targetCalendar) == 0
                                         || mAvailableSchedule.selectedToCalendar.compareTo(targetCalendar) == 0)) {
 
-                                    dayTextView.setBackgroundColor(mColorSet.availableDayBackgroundColorAlpha);
+                                    dayTextView.setBackgroundResource(R.drawable.layer_available_day_alpha);
+
+                                // 開始日、終了日が同日の色をセットする。
+                                } else if ((mAvailableSchedule.selectedFromCalendar.compareTo(targetCalendar) == 0
+                                        && mAvailableSchedule.selectedToCalendar.compareTo(targetCalendar) == 0)) {
+
+                                    dayTextView.setBackgroundResource(R.drawable.layer_available_day);
+
+                                // 開始日、終了日の色をセットする。
                                 } else {
-                                    dayTextView.setBackgroundColor(mColorSet.availableDayBackgroundColor);
+                                    // 開始日の色をセットする。
+                                    if (mAvailableSchedule.selectedFromCalendar.compareTo(targetCalendar) == 0) {
+                                        dayTextView.setBackgroundResource(R.drawable.layer_available_day_from);
+                                    }
+                                    // 終了日の色をセットする。
+                                    if (mAvailableSchedule.selectedToCalendar.compareTo(targetCalendar) == 0) {
+                                        dayTextView.setBackgroundResource(R.drawable.layer_available_day_to);
+                                    }
                                 }
                                 dayTextView.setTextColor(mColorSet.availableDayTextColor);
                             }
 
                         } else if (mAvailableSchedule.selectedFromCalendar != null && mAvailableSchedule.selectedToCalendar == null) {
 
+                            // 範囲選択開始が決まったときの色をセットする。
                             if (mAvailableSchedule.selectedFromCalendar.compareTo(targetCalendar) == 0) {
-                                dayTextView.setBackgroundColor(mColorSet.clickedDayBackgroundColor);
+                                dayTextView.setBackgroundResource(R.drawable.layer_clicked_day);
                                 dayTextView.setTextColor(mColorSet.clickedDayTextColor);
                             }
                         }
@@ -370,13 +399,11 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
         TextView dayText = (TextView) view;
 
         // タップされた年月を取得する。
-        // TODO tomo-sato 親を辿っているためレイアウトに依存している。他に方法が無いか要検討。
         ViewGroup viewWeekGroup = (ViewGroup) view.getParent();
         ViewGroup viewLinearLayoutGroup = (ViewGroup) viewWeekGroup.getParent();
         ViewGroup viewMonthLinearLayoutGroup = (ViewGroup) viewLinearLayoutGroup.getParent();
         String yearMonthStr = ((TextView) viewMonthLinearLayoutGroup.findViewById(R.id.month_text_view)).getText().toString();
 
-        // TODO tomo-sato 年月取得暫定　メッソド化するなり何なりする。
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(mYearMonthFormat);
         Date date = null;
         try {
@@ -451,6 +478,37 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
             View weekView;
             /** 1週間の日リスト */
             List<TextView> dayTextViewList = new ArrayList<>();
+        }
+    }
+
+    /**
+     * リソースの色を設定する。
+     *
+     * @param resourceId リソースID
+     * @param colorResourceId カラーリソースID
+     * @author tomo-sato
+     * @since 1.0.0
+     */
+    private void setDrawableResourceBackgroundColor(int resourceId, int colorResourceId) {
+        LayerDrawable layerDrawable = (LayerDrawable) this.getDrawableResource(resourceId);
+        GradientDrawable strokeDrawable = (GradientDrawable) layerDrawable.findDrawableByLayerId(R.id.item_background_color);
+        strokeDrawable.setColor(colorResourceId);
+    }
+
+    /**
+     * Drawableを取得する。
+     *
+     * @param resourceId リソースID
+     * @return Drawable
+     * @author tomo-sato
+     * @since 1.0.0
+     */
+    @SuppressWarnings("deprecation")
+    private Drawable getDrawableResource(int resourceId){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
+            return mContext.getDrawable(resourceId);
+        } else {
+            return mContext.getResources().getDrawable(resourceId);
         }
     }
 }

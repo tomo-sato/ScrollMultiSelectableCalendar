@@ -23,7 +23,9 @@ import jp.dcworks.android.views.scrollmultiselectablecalendar.ui.list.MonthListA
 
 /**
  * ScrollMultiSelectableCalendarViewメイン処理クラス。
+ * <p>iOS ZBJCalendarの再現を目的としたCalendarView。
  *
+ * @see "https://github.com/wanggang316/ZBJCalendar"
  * @author tomo-sato
  * @since 1.0.0
  */
