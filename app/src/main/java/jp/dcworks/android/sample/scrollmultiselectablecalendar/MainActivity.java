@@ -49,9 +49,9 @@ public class MainActivity extends AppCompatActivity {
         // クリックイベントをセットする。
         calendarView.setOnDateClickListener(new ScrollMultiSelectableCalendarView.OnDateClickListener() {
             @Override
-            public void onDateClick(View view, Calendar calendar) {
+            public void onDateClick(View view, Calendar calendar, boolean isClickFixed) {
                 Toast.makeText(MainActivity.this,
-                        SimpleDate.toSimpleDate(calendar).toString(),
+                        SimpleDate.toSimpleDate(calendar).toString() + ", isClickFixed=" + isClickFixed,
                         Toast.LENGTH_SHORT).show();
             }
 

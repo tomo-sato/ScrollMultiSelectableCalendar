@@ -63,10 +63,11 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
          *
          * @param view クリックされたViewを通知する。
          * @param calendar クリックされたViewのカレンダーを通知する。
+         * @param isClickFixed クリック操作が確定したかどうかを通知する。（true：確定。単一選択の場合は必ずtrueを通知する。範囲指定の場合は、範囲が決まった時にtrueを通知する。）
          * @author tomo-sato
          * @since 1.0.0
          */
-        void onDateClick(View view, Calendar calendar);
+        void onDateClick(View view, Calendar calendar, boolean isClickFixed);
 
         /**
          * 範囲選択時、開始終了が決定したタイミングで通知する。
@@ -238,17 +239,25 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
 
     @Override
     public void onDateClick(View view, Calendar calendar) {
+        boolean isClickFixed = false;
+
         if (mScheduleMode == ScheduleMode.SINGLE) {
             onClickAtSingleMode(calendar);
+            isClickFixed = true;
+
         } else if (mScheduleMode == ScheduleMode.RANGE) {
             onClickAsRangeMode(calendar);
+            if (mAvailableSchedule.selectedToCalendar != null) {
+                isClickFixed = true;
+            }
+
         } else if (mScheduleMode == ScheduleMode.DISPLAY) {
             return;
         }
 
         // リスナーがセットされている場合、クリック時のイベントを通知する。
         if (mOnDateClickListener != null) {
-            mOnDateClickListener.onDateClick(view, calendar);
+            mOnDateClickListener.onDateClick(view, calendar, isClickFixed);
         }
     }
 
