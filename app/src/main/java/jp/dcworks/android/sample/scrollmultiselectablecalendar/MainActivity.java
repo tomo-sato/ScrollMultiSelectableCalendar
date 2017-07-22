@@ -8,6 +8,7 @@ import android.widget.Toast;
 import java.util.Calendar;
 import java.util.TimeZone;
 
+import jp.dcworks.android.views.scrollmultiselectablecalendar.consts.ScheduleMode;
 import jp.dcworks.android.views.scrollmultiselectablecalendar.entity.AvailableSchedule;
 import jp.dcworks.android.views.scrollmultiselectablecalendar.entity.SimpleDate;
 import jp.dcworks.android.views.scrollmultiselectablecalendar.ui.ScrollMultiSelectableCalendarView;
@@ -27,6 +28,9 @@ public class MainActivity extends AppCompatActivity {
 
         // カレンダーView生成
         ScrollMultiSelectableCalendarView calendarView = (ScrollMultiSelectableCalendarView) findViewById(R.id.calendar_view);
+
+        // スケジュールモードをセットする。（※デフォルト：範囲指定）
+        calendarView.setScheduleMode(ScheduleMode.RANGE);
 
         // カレンダーの表示範囲を設定する。
         calendarView.addViewCalendar(getCalendar(2017, 1, 1));

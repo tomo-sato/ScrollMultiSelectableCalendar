@@ -176,6 +176,20 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
     }
 
     /**
+     * スケジュールモードをセットする。
+     *
+     * @param scheduleMode スケジュールモード
+     * @author tomo-sato
+     * @since 1.0.0
+     */
+    public void setScheduleMode(ScheduleMode scheduleMode) {
+        mScheduleMode = scheduleMode;
+
+        // 再描画処理
+        this.redraw();
+    }
+
+    /**
      * 属性をセットする。
      *
      * @param attrs 属性（{@code AttributeSet}が{@code null}の場合、デフォルト値で初期化する。）
