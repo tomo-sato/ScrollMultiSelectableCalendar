@@ -140,95 +140,37 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
         return false;
     }
 
-//    @Override
-//    public View getView(int position, View convertView, ViewGroup parent) {
-//
-////        View view;
-////        ViewHolder viewHolder;
-//
-//// TODO tomo-sato リサイクルできるように調整の余地あり。
-////        if (convertView == null) {
-//            View view = mLayoutInflater.inflate(R.layout.inc_month, parent, false);
-//
-//            ViewHolder viewHolder = new ViewHolder();
-//            // 年月テキスト
-//            viewHolder.monthTextView = (TextView) view.findViewById(R.id.month_text_view);
-//            // 各週
-//            for (int weekResId : INCLUDE_WEEK_RESOURCES_ID_ARRAY) {
-//                ViewHolder.WeekViewSet weekViewSet = new ViewHolder.WeekViewSet();
-//                weekViewSet.weekView = view.findViewById(weekResId);
-//
-//                for (int dayResId : INCLUDE_DAY_RESOURCES_ID_ARRAY) {
-//                    weekViewSet.dayTextViewList.add((TextView) weekViewSet.weekView.findViewById(dayResId));
-//                }
-//
-//                viewHolder.weekViewSetList.add(weekViewSet);
-//            }
-//
-//            view.setTag(viewHolder);
-////        } else {
-////            view = convertView;
-////            viewHolder = (ViewHolder) view.getTag();
-////        }
-//
-//        final Calendar calendar = getItem(position);
-//        if (calendar == null) {
-//            return view;
-//        }
-//
-//        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(mYearMonthFormat);
-//
-//        // 年月をセット
-//        viewHolder.monthTextView.setText(simpleDateFormat.format(calendar.getTime()));
-//        viewHolder.monthTextView.setTextColor(mColorSet.monthTextColor);
-//
-//        // 日をセット
-//        setWeekView(calendar, viewHolder);
-//
-//        return view;
-//    }
-
+    @Override
     public View getView(int position, View convertView, ViewGroup parent) {
-
-        View view;
-        ViewHolder viewHolder;
-
-        if (convertView == null) {
-
-            view = mLayoutInflater.inflate(R.layout.inc_month, parent, false);
-
-            viewHolder = new ViewHolder();
-            // 年月テキスト
-            viewHolder.monthTextView = (TextView) view.findViewById(R.id.month_text_view);
-            // 各週
-            for (int weekResId : INCLUDE_WEEK_RESOURCES_ID_ARRAY) {
-                ViewHolder.WeekViewSet weekViewSet = new ViewHolder.WeekViewSet();
-                weekViewSet.weekView = view.findViewById(weekResId);
-
-                for (int dayResId : INCLUDE_DAY_RESOURCES_ID_ARRAY) {
-                    weekViewSet.dayTextViewList.add((TextView) weekViewSet.weekView.findViewById(dayResId));
-                }
-
-                viewHolder.weekViewSetList.add(weekViewSet);
-            }
-
-            final Calendar calendar = getItem(position);
-            if (calendar == null) {
-                return null;
-            }
-
-            // 日をセット
-            setViewHolderWeekView(calendar, viewHolder);
-
-            view.setTag(viewHolder);
-        } else {
-            view = convertView;
-            viewHolder = (ViewHolder) view.getTag();
-        }
 
         final Calendar calendar = getItem(position);
         if (calendar == null) {
             return null;
+        }
+
+        View view;
+        ViewHolder viewHolder;
+        if (convertView == null) {
+            view = mLayoutInflater.inflate(R.layout.inc_month, parent, false);
+            viewHolder = initViewHolder(view);
+            view.setTag(viewHolder);
+
+        } else {
+            view = convertView;
+            viewHolder = (ViewHolder) view.getTag();
+
+            // ある月が何週あるか（週の数）
+            int weekOfMonth = calendar.getActualMaximum(Calendar.WEEK_OF_MONTH);
+
+            // 使いまわしているため、週が足りない場合がある。
+            ViewGroup viewGroup = (ViewGroup) viewHolder.weekViewSetList.get(0).weekView.getParent();
+            int childCount = viewGroup.getChildCount();
+            // 週が足りなかった場合、ViewHolderを再構成する。
+            if (weekOfMonth > childCount) {
+                view = mLayoutInflater.inflate(R.layout.inc_month, parent, false);
+                viewHolder = initViewHolder(view);
+                view.setTag(viewHolder);
+            }
         }
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(mYearMonthFormat);
@@ -237,151 +179,35 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
         viewHolder.monthTextView.setText(simpleDateFormat.format(calendar.getTime()));
         viewHolder.monthTextView.setTextColor(mColorSet.monthTextColor);
 
-        // 日をセット
-        setViewHolderWeekView(calendar, viewHolder);
+        this.setViewHolderWeekView(calendar, viewHolder);
 
         return view;
     }
 
     /**
-     * 日をセットする。
+     * ViewHolderを初期化する。
      *
-     * @param calendar 表示するカレンダー
-     * @param viewHolder Viewホルダー
+     * @param view View
+     * @return ViewHolderを返す。
      * @author tomo-sato
      * @since 1.0.0
      */
-    private void setWeekView(Calendar calendar, ViewHolder viewHolder) {
+    private ViewHolder initViewHolder(View view) {
+        ViewHolder viewHolder = new ViewHolder();
+        // 年月テキスト
+        viewHolder.monthTextView = (TextView) view.findViewById(R.id.month_text_view);
+        // 各週
+        for (int weekResId : INCLUDE_WEEK_RESOURCES_ID_ARRAY) {
+            ViewHolder.WeekViewSet weekViewSet = new ViewHolder.WeekViewSet();
+            weekViewSet.weekView = view.findViewById(weekResId);
 
-        // 1日の曜日を取得する。
-        int oneOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
-
-        // ある月が何週あるか（週の数）
-        int weekOfMonth = calendar.getActualMaximum(Calendar.WEEK_OF_MONTH);
-
-        // ある月が何日あるか（日数）
-        int dayOfMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-
-        // 日付
-        int day = 1;
-
-        // 週
-        for (int i = 0; i < 6; i++) {
-            ViewHolder.WeekViewSet weekViewSet = viewHolder.weekViewSetList.get(i);
-            View weekView = weekViewSet.weekView;
-
-            // 余った週はViewから削除する。
-            if (weekOfMonth < (i + 1)) {
-                if (weekView != null) {
-                    ViewGroup viewGroup = (ViewGroup) weekView.getParent();
-                    if (viewGroup != null) {
-                        viewGroup.removeView(weekView);
-                    }
-                }
-                continue;
+            for (int dayResId : INCLUDE_DAY_RESOURCES_ID_ARRAY) {
+                weekViewSet.dayTextViewList.add((TextView) weekViewSet.weekView.findViewById(dayResId));
             }
 
-            // 日
-            for (int j = 0; j < 7; j++) {
-                if (weekView != null) {
-                    TextView dayTextView = weekViewSet.dayTextViewList.get(j);
-
-                    // 余った日はViewを非表示にする。また1日未満の日を非表示にする。
-                    if (dayOfMonth < day) {
-                        dayTextView.setVisibility(View.INVISIBLE);
-                        continue;
-                    }
-
-                    // 1日未満の日を非表示にする。
-                    if ((day == 1 && oneOfWeek > (j + 1))) {
-                        dayTextView.setVisibility(View.INVISIBLE);
-                        continue;
-                    }
-
-                    // 日付をセットする。
-                    dayTextView.setText(String.valueOf(day));
-
-                    // 曜日毎にテキストカラーをセットする。
-                    switch (j) {
-                        // 日曜
-                        case 0:
-                            dayTextView.setTextColor(mColorSet.daySundayTextColor);
-                            break;
-
-                        // 土曜
-                        case 6:
-                            dayTextView.setTextColor(mColorSet.dayWeekendTextColor);
-                            break;
-
-                        // 平日
-                        default:
-                            dayTextView.setTextColor(mColorSet.dayTextColor);
-                    }
-
-                    // 日付をカレンダーにセットする。
-                    Calendar targetCalendar = Calendar.getInstance();
-                    targetCalendar.setTime(calendar.getTime());
-                    targetCalendar.set(Calendar.DATE, day);
-
-                    // 選択状態（個別選択）をセットする。
-                    if (mAvailableSchedule != null) {
-                        if (mAvailableSchedule.selectedCalendarList != null && !mAvailableSchedule.selectedCalendarList.isEmpty()) {
-                            for (Calendar selectedCalendar : mAvailableSchedule.selectedCalendarList) {
-                                if (selectedCalendar.compareTo(targetCalendar) == 0) {
-                                    dayTextView.setBackgroundColor(mColorSet.availableDayBackgroundColor);
-                                    dayTextView.setTextColor(mColorSet.availableDayTextColor);
-                                }
-                            }
-                        }
-
-                        // 選択状態（範囲選択）をセットする。
-                        if (mAvailableSchedule.selectedFromCalendar != null && mAvailableSchedule.selectedToCalendar != null) {
-
-                            if ((mAvailableSchedule.selectedFromCalendar != null && mAvailableSchedule.selectedFromCalendar.compareTo(targetCalendar) <= 0)
-                                    && (mAvailableSchedule.selectedToCalendar != null && mAvailableSchedule.selectedToCalendar.compareTo(targetCalendar) >= 0)) {
-
-                                if (!(mAvailableSchedule.selectedFromCalendar.compareTo(targetCalendar) == 0
-                                        || mAvailableSchedule.selectedToCalendar.compareTo(targetCalendar) == 0)) {
-
-                                    dayTextView.setBackgroundColor(mColorSet.availableDayBackgroundColorAlpha);
-                                } else {
-                                    dayTextView.setBackgroundColor(mColorSet.availableDayBackgroundColor);
-                                }
-                                dayTextView.setTextColor(mColorSet.availableDayTextColor);
-                            }
-
-                        } else if (mAvailableSchedule.selectedFromCalendar != null && mAvailableSchedule.selectedToCalendar == null) {
-
-                            if (mAvailableSchedule.selectedFromCalendar.compareTo(targetCalendar) == 0) {
-                                dayTextView.setBackgroundColor(mColorSet.clickedDayBackgroundColor);
-                                dayTextView.setTextColor(mColorSet.clickedDayTextColor);
-                            }
-                        }
-
-                        // クリックイベントをセットする。
-                        if ((mAvailableSchedule.selectableFromCalendar != null && mAvailableSchedule.selectableFromCalendar.compareTo(targetCalendar) <= 0)
-                                && (mAvailableSchedule.selectableToCalendar != null && mAvailableSchedule.selectableToCalendar.compareTo(targetCalendar) >= 0)) {
-
-                            dayTextView.setOnClickListener(this);
-
-                        } else if ((mAvailableSchedule.selectableFromCalendar != null && mAvailableSchedule.selectableFromCalendar.compareTo(targetCalendar) <= 0)
-                                && (mAvailableSchedule.selectableToCalendar == null)) {
-
-                            dayTextView.setOnClickListener(this);
-
-                        } else if ((mAvailableSchedule.selectableFromCalendar == null)
-                                && (mAvailableSchedule.selectableToCalendar != null && mAvailableSchedule.selectableToCalendar.compareTo(targetCalendar) >= 0)) {
-
-                            dayTextView.setOnClickListener(this);
-
-                        } else {
-                            dayTextView.setTextColor(mColorSet.disableDayTextColor);
-                        }
-                    }
-                    day++;
-                }
-            }
+            viewHolder.weekViewSetList.add(weekViewSet);
         }
+        return viewHolder;
     }
 
     /**
@@ -418,8 +244,7 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
                     if (viewGroup != null) {
 
                         // 参照に対して操作を行う。
-                        ((ViewGroup) viewHolder.weekViewSetList.get(i).weekView.getParent())
-                                .removeView(weekView);
+                        viewGroup.removeView(weekView);
                     }
                 }
                 continue;
@@ -429,6 +254,12 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
             for (int j = 0; j < 7; j++) {
                 if (weekView != null) {
                     TextView dayTextView = weekViewSet.dayTextViewList.get(j);
+
+                    // リサイクルしてる都合、初期化処理が必要。
+                    dayTextView.setVisibility(View.VISIBLE);
+                    dayTextView.setOnClickListener(null);
+                    dayTextView.setBackgroundResource(R.drawable.border_top);
+                    dayTextView.setTextColor(mColorSet.dayTextColor);
 
                     // 余った日はViewを非表示にする。また1日未満の日を非表示にする。
                     if (dayOfMonth < day) {
@@ -528,9 +359,6 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
                             dayTextView.setTextColor(mColorSet.disableDayTextColor);
                         }
                     }
-
-                    // ViewHolderにセットし直す。
-                    weekViewSet.dayTextViewList.set(j, dayTextView);
                     day++;
                 }
             }
@@ -548,7 +376,7 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
         ViewGroup viewMonthLinearLayoutGroup = (ViewGroup) viewLinearLayoutGroup.getParent();
         String yearMonthStr = ((TextView) viewMonthLinearLayoutGroup.findViewById(R.id.month_text_view)).getText().toString();
 
-        // TODO tomo-sato 年月取得暫定
+        // TODO tomo-sato 年月取得暫定　メッソド化するなり何なりする。
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(mYearMonthFormat);
         Date date = null;
         try {
@@ -606,6 +434,7 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
      * @since 1.0.0
      */
     private static class ViewHolder {
+
         /** 年月 */
         TextView monthTextView;
         /** 各週 */
