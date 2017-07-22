@@ -97,7 +97,7 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
      * @since 1.0.0
      */
     public void setOnDateClickListener(OnDateClickListener listener) {
-        this.mOnDateClickListener = listener;
+        mOnDateClickListener = listener;
     }
 
 
@@ -111,23 +111,23 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
      */
     public MonthListAdapter(Context context, ColorSet colorSet) {
         super();
-        this.mContext = context;
-        this.mColorSet = colorSet;
-        this.mLayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
-        this.mCalendarList = new ArrayList<>();
+        mContext = context;
+        mColorSet = colorSet;
+        mLayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
+        mCalendarList = new ArrayList<>();
     }
 
     @Override
     public int getCount() {
-        return (this.mCalendarList != null) ? this.mCalendarList.size() : 0;
+        return (mCalendarList != null) ? mCalendarList.size() : 0;
     }
 
     @Override
     public Calendar getItem(int position) {
-        if (this.mCalendarList.isEmpty() || this.mCalendarList.size() <= position) {
+        if (mCalendarList.isEmpty() || mCalendarList.size() <= position) {
             return null;
         }
-        return this.mCalendarList.get(position);
+        return mCalendarList.get(position);
     }
 
     @Override
@@ -148,7 +148,7 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
 
 // TODO tomo-sato リサイクルできるように調整の余地あり。
 //        if (convertView == null) {
-            View view = this.mLayoutInflater.inflate(R.layout.inc_month, parent, false);
+            View view = mLayoutInflater.inflate(R.layout.inc_month, parent, false);
 
             ViewHolder viewHolder = new ViewHolder();
             // 年月テキスト
@@ -176,11 +176,11 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
             return view;
         }
 
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(this.mYearMonthFormat);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(mYearMonthFormat);
 
         // 年月をセット
         viewHolder.monthTextView.setText(simpleDateFormat.format(calendar.getTime()));
-        viewHolder.monthTextView.setTextColor(this.mColorSet.monthTextColor);
+        viewHolder.monthTextView.setTextColor(mColorSet.monthTextColor);
 
         // 日をセット
         setWeekView(calendar, viewHolder);
@@ -250,17 +250,17 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
                     switch (j) {
                         // 日曜
                         case 0:
-                            dayTextView.setTextColor(this.mColorSet.daySundayTextColor);
+                            dayTextView.setTextColor(mColorSet.daySundayTextColor);
                             break;
 
                         // 土曜
                         case 6:
-                            dayTextView.setTextColor(this.mColorSet.dayWeekendTextColor);
+                            dayTextView.setTextColor(mColorSet.dayWeekendTextColor);
                             break;
 
                         // 平日
                         default:
-                            dayTextView.setTextColor(this.mColorSet.dayTextColor);
+                            dayTextView.setTextColor(mColorSet.dayTextColor);
                     }
 
                     // 日付をカレンダーにセットする。
@@ -269,58 +269,58 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
                     targetCalendar.set(Calendar.DATE, day);
 
                     // 選択状態（個別選択）をセットする。
-                    if (this.mAvailableSchedule != null) {
-                        if (this.mAvailableSchedule.selectedCalendarList != null && !this.mAvailableSchedule.selectedCalendarList.isEmpty()) {
-                            for (Calendar selectedCalendar : this.mAvailableSchedule.selectedCalendarList) {
+                    if (mAvailableSchedule != null) {
+                        if (mAvailableSchedule.selectedCalendarList != null && !mAvailableSchedule.selectedCalendarList.isEmpty()) {
+                            for (Calendar selectedCalendar : mAvailableSchedule.selectedCalendarList) {
                                 if (selectedCalendar.compareTo(targetCalendar) == 0) {
-                                    dayTextView.setBackgroundColor(this.mColorSet.availableDayBackgroundColor);
-                                    dayTextView.setTextColor(this.mColorSet.availableDayTextColor);
+                                    dayTextView.setBackgroundColor(mColorSet.availableDayBackgroundColor);
+                                    dayTextView.setTextColor(mColorSet.availableDayTextColor);
                                 }
                             }
                         }
 
                         // 選択状態（範囲選択）をセットする。
-                        if (this.mAvailableSchedule.selectedFromCalendar != null && this.mAvailableSchedule.selectedToCalendar != null) {
+                        if (mAvailableSchedule.selectedFromCalendar != null && mAvailableSchedule.selectedToCalendar != null) {
 
-                            if ((this.mAvailableSchedule.selectedFromCalendar != null && this.mAvailableSchedule.selectedFromCalendar.compareTo(targetCalendar) <= 0)
-                                    && (this.mAvailableSchedule.selectedToCalendar != null && this.mAvailableSchedule.selectedToCalendar.compareTo(targetCalendar) >= 0)) {
+                            if ((mAvailableSchedule.selectedFromCalendar != null && mAvailableSchedule.selectedFromCalendar.compareTo(targetCalendar) <= 0)
+                                    && (mAvailableSchedule.selectedToCalendar != null && mAvailableSchedule.selectedToCalendar.compareTo(targetCalendar) >= 0)) {
 
-                                if (!(this.mAvailableSchedule.selectedFromCalendar.compareTo(targetCalendar) == 0
-                                        || this.mAvailableSchedule.selectedToCalendar.compareTo(targetCalendar) == 0)) {
+                                if (!(mAvailableSchedule.selectedFromCalendar.compareTo(targetCalendar) == 0
+                                        || mAvailableSchedule.selectedToCalendar.compareTo(targetCalendar) == 0)) {
 
-                                    dayTextView.setBackgroundColor(this.mColorSet.availableDayBackgroundColorAlpha);
+                                    dayTextView.setBackgroundColor(mColorSet.availableDayBackgroundColorAlpha);
                                 } else {
-                                    dayTextView.setBackgroundColor(this.mColorSet.availableDayBackgroundColor);
+                                    dayTextView.setBackgroundColor(mColorSet.availableDayBackgroundColor);
                                 }
-                                dayTextView.setTextColor(this.mColorSet.availableDayTextColor);
+                                dayTextView.setTextColor(mColorSet.availableDayTextColor);
                             }
 
-                        } else if (this.mAvailableSchedule.selectedFromCalendar != null && this.mAvailableSchedule.selectedToCalendar == null) {
+                        } else if (mAvailableSchedule.selectedFromCalendar != null && mAvailableSchedule.selectedToCalendar == null) {
 
-                            if (this.mAvailableSchedule.selectedFromCalendar.compareTo(targetCalendar) == 0) {
-                                dayTextView.setBackgroundColor(this.mColorSet.clickedDayBackgroundColor);
-                                dayTextView.setTextColor(this.mColorSet.clickedDayTextColor);
+                            if (mAvailableSchedule.selectedFromCalendar.compareTo(targetCalendar) == 0) {
+                                dayTextView.setBackgroundColor(mColorSet.clickedDayBackgroundColor);
+                                dayTextView.setTextColor(mColorSet.clickedDayTextColor);
                             }
                         }
 
                         // クリックイベントをセットする。
-                        if ((this.mAvailableSchedule.selectableFromCalendar != null && this.mAvailableSchedule.selectableFromCalendar.compareTo(targetCalendar) <= 0)
-                                && (this.mAvailableSchedule.selectableToCalendar != null && this.mAvailableSchedule.selectableToCalendar.compareTo(targetCalendar) >= 0)) {
+                        if ((mAvailableSchedule.selectableFromCalendar != null && mAvailableSchedule.selectableFromCalendar.compareTo(targetCalendar) <= 0)
+                                && (mAvailableSchedule.selectableToCalendar != null && mAvailableSchedule.selectableToCalendar.compareTo(targetCalendar) >= 0)) {
 
                             dayTextView.setOnClickListener(this);
 
-                        } else if ((this.mAvailableSchedule.selectableFromCalendar != null && this.mAvailableSchedule.selectableFromCalendar.compareTo(targetCalendar) <= 0)
-                                && (this.mAvailableSchedule.selectableToCalendar == null)) {
+                        } else if ((mAvailableSchedule.selectableFromCalendar != null && mAvailableSchedule.selectableFromCalendar.compareTo(targetCalendar) <= 0)
+                                && (mAvailableSchedule.selectableToCalendar == null)) {
 
                             dayTextView.setOnClickListener(this);
 
-                        } else if ((this.mAvailableSchedule.selectableFromCalendar == null)
-                                && (this.mAvailableSchedule.selectableToCalendar != null && this.mAvailableSchedule.selectableToCalendar.compareTo(targetCalendar) >= 0)) {
+                        } else if ((mAvailableSchedule.selectableFromCalendar == null)
+                                && (mAvailableSchedule.selectableToCalendar != null && mAvailableSchedule.selectableToCalendar.compareTo(targetCalendar) >= 0)) {
 
                             dayTextView.setOnClickListener(this);
 
                         } else {
-                            dayTextView.setTextColor(this.mColorSet.disableDayTextColor);
+                            dayTextView.setTextColor(mColorSet.disableDayTextColor);
                         }
                     }
                     day++;
@@ -341,7 +341,7 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
         String yearMonthStr = ((TextView) viewMonthLinearLayoutGroup.findViewById(R.id.month_text_view)).getText().toString();
 
         // TODO tomo-sato 年月取得暫定
-        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(this.mYearMonthFormat);
+        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(mYearMonthFormat);
         Date date = null;
         try {
             date = simpleDateFormat.parse(yearMonthStr);
@@ -353,8 +353,8 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
         calendar.set(Calendar.DATE, Integer.parseInt(dayText.getText().toString()));
 
         // リスナーがセットされている場合、クリック時のイベントを通知する。
-        if (this.mOnDateClickListener != null) {
-            this.mOnDateClickListener.onDateClick(view, calendar);
+        if (mOnDateClickListener != null) {
+            mOnDateClickListener.onDateClick(view, calendar);
         }
     }
 
@@ -365,7 +365,7 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
      * @since 1.0.0
      */
     public void clear() {
-        this.mCalendarList.clear();
+        mCalendarList.clear();
         notifyDataSetChanged();
     }
 
@@ -377,7 +377,7 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
      * @since 1.0.0
      */
     public void addAll(List<Calendar> list) {
-        this.mCalendarList.addAll(list);
+        mCalendarList.addAll(list);
     }
 
     /**
@@ -388,7 +388,7 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
      * @since 1.0.0
      */
     public void setAvailableSchedule(AvailableSchedule availableSchedule) {
-        this.mAvailableSchedule = availableSchedule;
+        mAvailableSchedule = availableSchedule;
     }
 
     /**
