@@ -140,17 +140,64 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
         return false;
     }
 
-    @Override
+//    @Override
+//    public View getView(int position, View convertView, ViewGroup parent) {
+//
+////        View view;
+////        ViewHolder viewHolder;
+//
+//// TODO tomo-sato リサイクルできるように調整の余地あり。
+////        if (convertView == null) {
+//            View view = mLayoutInflater.inflate(R.layout.inc_month, parent, false);
+//
+//            ViewHolder viewHolder = new ViewHolder();
+//            // 年月テキスト
+//            viewHolder.monthTextView = (TextView) view.findViewById(R.id.month_text_view);
+//            // 各週
+//            for (int weekResId : INCLUDE_WEEK_RESOURCES_ID_ARRAY) {
+//                ViewHolder.WeekViewSet weekViewSet = new ViewHolder.WeekViewSet();
+//                weekViewSet.weekView = view.findViewById(weekResId);
+//
+//                for (int dayResId : INCLUDE_DAY_RESOURCES_ID_ARRAY) {
+//                    weekViewSet.dayTextViewList.add((TextView) weekViewSet.weekView.findViewById(dayResId));
+//                }
+//
+//                viewHolder.weekViewSetList.add(weekViewSet);
+//            }
+//
+//            view.setTag(viewHolder);
+////        } else {
+////            view = convertView;
+////            viewHolder = (ViewHolder) view.getTag();
+////        }
+//
+//        final Calendar calendar = getItem(position);
+//        if (calendar == null) {
+//            return view;
+//        }
+//
+//        SimpleDateFormat simpleDateFormat = new SimpleDateFormat(mYearMonthFormat);
+//
+//        // 年月をセット
+//        viewHolder.monthTextView.setText(simpleDateFormat.format(calendar.getTime()));
+//        viewHolder.monthTextView.setTextColor(mColorSet.monthTextColor);
+//
+//        // 日をセット
+//        setWeekView(calendar, viewHolder);
+//
+//        return view;
+//    }
+
     public View getView(int position, View convertView, ViewGroup parent) {
 
-//        View view;
-//        ViewHolder viewHolder;
+        View view;
+        ViewHolder viewHolder;
 
-// TODO tomo-sato リサイクルできるように調整の余地あり。
-//        if (convertView == null) {
-            View view = mLayoutInflater.inflate(R.layout.inc_month, parent, false);
+        if (convertView == null) {
 
-            ViewHolder viewHolder = new ViewHolder();
+            view = mLayoutInflater.inflate(R.layout.inc_month, parent, false);
+
+            viewHolder = new ViewHolder();
             // 年月テキスト
             viewHolder.monthTextView = (TextView) view.findViewById(R.id.month_text_view);
             // 各週
@@ -165,15 +212,23 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
                 viewHolder.weekViewSetList.add(weekViewSet);
             }
 
+            final Calendar calendar = getItem(position);
+            if (calendar == null) {
+                return null;
+            }
+
+            // 日をセット
+            setViewHolderWeekView(calendar, viewHolder);
+
             view.setTag(viewHolder);
-//        } else {
-//            view = convertView;
-//            viewHolder = (ViewHolder) view.getTag();
-//        }
+        } else {
+            view = convertView;
+            viewHolder = (ViewHolder) view.getTag();
+        }
 
         final Calendar calendar = getItem(position);
         if (calendar == null) {
-            return view;
+            return null;
         }
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(mYearMonthFormat);
@@ -183,7 +238,7 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
         viewHolder.monthTextView.setTextColor(mColorSet.monthTextColor);
 
         // 日をセット
-        setWeekView(calendar, viewHolder);
+        setViewHolderWeekView(calendar, viewHolder);
 
         return view;
     }
@@ -323,6 +378,159 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
                             dayTextView.setTextColor(mColorSet.disableDayTextColor);
                         }
                     }
+                    day++;
+                }
+            }
+        }
+    }
+
+    /**
+     * 日をセットする。
+     *
+     * @param calendar 表示するカレンダー
+     * @param viewHolder Viewホルダー（※この参照に対して操作を行う。）
+     * @author tomo-sato
+     * @since 1.0.0
+     */
+    private void setViewHolderWeekView(Calendar calendar, ViewHolder viewHolder) {
+
+        // 1日の曜日を取得する。
+        int oneOfWeek = calendar.get(Calendar.DAY_OF_WEEK);
+
+        // ある月が何週あるか（週の数）
+        int weekOfMonth = calendar.getActualMaximum(Calendar.WEEK_OF_MONTH);
+
+        // ある月が何日あるか（日数）
+        int dayOfMonth = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+
+        // 日付
+        int day = 1;
+
+        // 週
+        for (int i = 0; i < 6; i++) {
+            ViewHolder.WeekViewSet weekViewSet = viewHolder.weekViewSetList.get(i);
+            View weekView = weekViewSet.weekView;
+
+            // 余った週はViewから削除する。
+            if (weekOfMonth < (i + 1)) {
+                if (weekView != null) {
+                    ViewGroup viewGroup = (ViewGroup) weekView.getParent();
+                    if (viewGroup != null) {
+
+                        // 参照に対して操作を行う。
+                        ((ViewGroup) viewHolder.weekViewSetList.get(i).weekView.getParent())
+                                .removeView(weekView);
+                    }
+                }
+                continue;
+            }
+
+            // 日
+            for (int j = 0; j < 7; j++) {
+                if (weekView != null) {
+                    TextView dayTextView = weekViewSet.dayTextViewList.get(j);
+
+                    // 余った日はViewを非表示にする。また1日未満の日を非表示にする。
+                    if (dayOfMonth < day) {
+                        dayTextView.setVisibility(View.INVISIBLE);
+
+                        // ViewHolderにセットし直す。
+                        weekViewSet.dayTextViewList.set(j, dayTextView);
+                        continue;
+                    }
+
+                    // 1日未満の日を非表示にする。
+                    if ((day == 1 && oneOfWeek > (j + 1))) {
+                        dayTextView.setVisibility(View.INVISIBLE);
+
+                        // ViewHolderにセットし直す。
+                        weekViewSet.dayTextViewList.set(j, dayTextView);
+                        continue;
+                    }
+
+                    // 日付をセットする。
+                    dayTextView.setText(String.valueOf(day));
+
+                    // 曜日毎にテキストカラーをセットする。
+                    switch (j) {
+                        // 日曜
+                        case 0:
+                            dayTextView.setTextColor(mColorSet.daySundayTextColor);
+                            break;
+
+                        // 土曜
+                        case 6:
+                            dayTextView.setTextColor(mColorSet.dayWeekendTextColor);
+                            break;
+
+                        // 平日
+                        default:
+                            dayTextView.setTextColor(mColorSet.dayTextColor);
+                    }
+
+                    // 日付をカレンダーにセットする。
+                    Calendar targetCalendar = Calendar.getInstance();
+                    targetCalendar.setTime(calendar.getTime());
+                    targetCalendar.set(Calendar.DATE, day);
+
+                    // 選択状態（個別選択）をセットする。
+                    if (mAvailableSchedule != null) {
+                        if (mAvailableSchedule.selectedCalendarList != null && !mAvailableSchedule.selectedCalendarList.isEmpty()) {
+                            for (Calendar selectedCalendar : mAvailableSchedule.selectedCalendarList) {
+                                if (selectedCalendar.compareTo(targetCalendar) == 0) {
+                                    dayTextView.setBackgroundColor(mColorSet.availableDayBackgroundColor);
+                                    dayTextView.setTextColor(mColorSet.availableDayTextColor);
+                                }
+                            }
+                        }
+
+                        // 選択状態（範囲選択）をセットする。
+                        if (mAvailableSchedule.selectedFromCalendar != null && mAvailableSchedule.selectedToCalendar != null) {
+
+                            if ((mAvailableSchedule.selectedFromCalendar != null && mAvailableSchedule.selectedFromCalendar.compareTo(targetCalendar) <= 0)
+                                    && (mAvailableSchedule.selectedToCalendar != null && mAvailableSchedule.selectedToCalendar.compareTo(targetCalendar) >= 0)) {
+
+                                if (!(mAvailableSchedule.selectedFromCalendar.compareTo(targetCalendar) == 0
+                                        || mAvailableSchedule.selectedToCalendar.compareTo(targetCalendar) == 0)) {
+
+                                    dayTextView.setBackgroundColor(mColorSet.availableDayBackgroundColorAlpha);
+                                } else {
+                                    dayTextView.setBackgroundColor(mColorSet.availableDayBackgroundColor);
+                                }
+                                dayTextView.setTextColor(mColorSet.availableDayTextColor);
+                            }
+
+                        } else if (mAvailableSchedule.selectedFromCalendar != null && mAvailableSchedule.selectedToCalendar == null) {
+
+                            if (mAvailableSchedule.selectedFromCalendar.compareTo(targetCalendar) == 0) {
+                                dayTextView.setBackgroundColor(mColorSet.clickedDayBackgroundColor);
+                                dayTextView.setTextColor(mColorSet.clickedDayTextColor);
+                            }
+                        }
+
+                        // クリックイベントをセットする。
+                        if ((mAvailableSchedule.selectableFromCalendar != null && mAvailableSchedule.selectableFromCalendar.compareTo(targetCalendar) <= 0)
+                                && (mAvailableSchedule.selectableToCalendar != null && mAvailableSchedule.selectableToCalendar.compareTo(targetCalendar) >= 0)) {
+
+                            dayTextView.setOnClickListener(this);
+
+                        } else if ((mAvailableSchedule.selectableFromCalendar != null && mAvailableSchedule.selectableFromCalendar.compareTo(targetCalendar) <= 0)
+                                && (mAvailableSchedule.selectableToCalendar == null)) {
+
+                            dayTextView.setOnClickListener(this);
+
+                        } else if ((mAvailableSchedule.selectableFromCalendar == null)
+                                && (mAvailableSchedule.selectableToCalendar != null && mAvailableSchedule.selectableToCalendar.compareTo(targetCalendar) >= 0)) {
+
+                            dayTextView.setOnClickListener(this);
+
+                        } else {
+                            dayTextView.setTextColor(mColorSet.disableDayTextColor);
+                        }
+                    }
+
+                    // ViewHolderにセットし直す。
+                    weekViewSet.dayTextViewList.set(j, dayTextView);
                     day++;
                 }
             }
