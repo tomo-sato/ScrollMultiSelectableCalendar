@@ -293,14 +293,14 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
         if (mAvailableSchedule.selectedFromCalendar == null) {
             mAvailableSchedule.selectedFromCalendar = calendar;
 
-            // 2回目以降かつ、範囲が決まっていない場合
+        // 2回目以降かつ、範囲が決まっていない場合
         } else if (mAvailableSchedule.selectedToCalendar == null) {
 
             // 初回タップより過去の場合セットし直し
             if (mAvailableSchedule.selectedFromCalendar.compareTo(calendar) > 0) {
                 mAvailableSchedule.selectedFromCalendar = calendar;
 
-                // 初回タップ以降未来の場合（同じ場所をタップした場合も含む）
+            // 初回タップ以降未来の場合（同じ場所をタップした場合も含む）
             } else {
                 mAvailableSchedule.selectedToCalendar = calendar;
 
@@ -311,7 +311,7 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
                 }
             }
 
-            // 範囲が決まっている場合
+        // 範囲が決まっている場合
         } else {
             mAvailableSchedule.selectedFromCalendar = calendar;
             mAvailableSchedule.selectedToCalendar = null;

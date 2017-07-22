@@ -1,16 +1,14 @@
 package jp.dcworks.android.sample.scrollmultiselectablecalendar;
 
-import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.view.View;
-import android.widget.Toast;
 
 import java.util.Calendar;
 import java.util.TimeZone;
 
 import jp.dcworks.android.views.scrollmultiselectablecalendar.consts.ScheduleMode;
 import jp.dcworks.android.views.scrollmultiselectablecalendar.entity.AvailableSchedule;
-import jp.dcworks.android.views.scrollmultiselectablecalendar.entity.SimpleDate;
 import jp.dcworks.android.views.scrollmultiselectablecalendar.ui.ScrollMultiSelectableCalendarView;
 
 /**
@@ -50,16 +48,16 @@ public class MainActivity extends AppCompatActivity {
         calendarView.setOnDateClickListener(new ScrollMultiSelectableCalendarView.OnDateClickListener() {
             @Override
             public void onDateClick(View view, Calendar calendar, boolean isClickFixed) {
-                Toast.makeText(MainActivity.this,
-                        SimpleDate.toSimpleDate(calendar).toString() + ", isClickFixed=" + isClickFixed,
-                        Toast.LENGTH_SHORT).show();
+//                Toast.makeText(MainActivity.this,
+//                        SimpleDate.toSimpleDate(calendar).toString() + ", isClickFixed=" + isClickFixed,
+//                        Toast.LENGTH_SHORT).show();
             }
 
             @Override
             public void onFixedRange(Calendar fromCalendar, Calendar toCalendar) {
-                Toast.makeText(MainActivity.this,
-                        SimpleDate.toSimpleDate(fromCalendar).toString() + "〜" + SimpleDate.toSimpleDate(toCalendar).toString(),
-                        Toast.LENGTH_LONG).show();
+//                Toast.makeText(MainActivity.this,
+//                        SimpleDate.toSimpleDate(fromCalendar).toString() + "〜" + SimpleDate.toSimpleDate(toCalendar).toString(),
+//                        Toast.LENGTH_SHORT).show();
             }
         });
     }

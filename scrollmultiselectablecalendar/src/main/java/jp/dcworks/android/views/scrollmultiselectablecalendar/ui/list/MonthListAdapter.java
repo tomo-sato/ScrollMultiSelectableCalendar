@@ -5,6 +5,7 @@ import android.graphics.drawable.Drawable;
 import android.graphics.drawable.GradientDrawable;
 import android.graphics.drawable.LayerDrawable;
 import android.os.Build;
+import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -29,6 +30,9 @@ import jp.dcworks.android.views.scrollmultiselectablecalendar.entity.ColorSet;
  * @since 1.0.0
  */
 public class MonthListAdapter extends BaseAdapter implements View.OnClickListener {
+
+    /** TAG */
+    private static final String TAG = MonthListAdapter.class.getSimpleName();
 
     /** 週ResourcesID配列 */
     private static final int[] INCLUDE_WEEK_RESOURCES_ID_ARRAY = {
@@ -403,13 +407,16 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
         ViewGroup viewLinearLayoutGroup = (ViewGroup) viewWeekGroup.getParent();
         ViewGroup viewMonthLinearLayoutGroup = (ViewGroup) viewLinearLayoutGroup.getParent();
         String yearMonthStr = ((TextView) viewMonthLinearLayoutGroup.findViewById(R.id.month_text_view)).getText().toString();
+        Log.d(TAG, "yearMonthStr=" + yearMonthStr + ", dayText=" + dayText.getText().toString());
 
         SimpleDateFormat simpleDateFormat = new SimpleDateFormat(mYearMonthFormat);
         Date date = null;
         try {
             date = simpleDateFormat.parse(yearMonthStr);
         } catch (ParseException e) {
+            Log.e(TAG, e.getMessage());
             e.printStackTrace();
+            return;
         }
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
