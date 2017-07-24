@@ -16,6 +16,7 @@
 
 package jp.dcworks.android.views.scrollmultiselectablecalendar.entity;
 
+import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.List;
@@ -26,7 +27,7 @@ import java.util.List;
  * @author tomo-sato
  * @since 1.0.0
  */
-public class AvailableSchedule {
+public class AvailableSchedule implements Serializable {
 
     /** 選択可能範囲：開始カレンダー */
     public Calendar selectableFromCalendar;

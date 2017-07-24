@@ -19,6 +19,8 @@ package jp.dcworks.android.views.scrollmultiselectablecalendar.ui;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Color;
+import android.os.Bundle;
+import android.os.Parcelable;
 import android.support.annotation.Nullable;
 import android.support.v4.content.ContextCompat;
 import android.util.AttributeSet;
@@ -360,5 +362,35 @@ public class ScrollMultiSelectableCalendarView extends LinearLayout implements M
         mMonthListAdapter.addAll(mViewCalendar);
         mMonthListAdapter.setAvailableSchedule(mAvailableSchedule);
         mMonthListAdapter.notifyDataSetChanged();
+    }
+
+    @Override
+    protected void onAttachedToWindow() {
+        super.onAttachedToWindow();
+        redraw();
+    }
+
+    @Override
+    protected Parcelable onSaveInstanceState() {
+        super.onSaveInstanceState();
+
+        // 縦横切替時の選択状態を保持
+        Bundle bundle = new Bundle();
+        bundle.putSerializable(AvailableSchedule.class.getName(), mAvailableSchedule);
+
+        return bundle;
+    }
+
+    @Override
+    protected void onRestoreInstanceState(Parcelable state) {
+
+        if(!(state instanceof Bundle)) {
+            return;
+        }
+
+        // 縦横切替時の選択状態を復元
+        Bundle bundle = (Bundle)state;
+        super.onRestoreInstanceState(bundle.getParcelable(AvailableSchedule.class.getName()));
+        mAvailableSchedule = (AvailableSchedule) bundle.getSerializable(AvailableSchedule.class.getName());
     }
 }
