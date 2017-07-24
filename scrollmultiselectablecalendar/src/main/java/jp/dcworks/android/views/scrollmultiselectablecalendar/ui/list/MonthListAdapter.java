@@ -139,13 +139,6 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
         mColorSet = colorSet;
         mLayoutInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mCalendarList = new ArrayList<>();
-
-        // リソースの色を設定する。
-        setDrawableResourceBackgroundColor(R.drawable.layer_available_day,       colorSet.availableDayBackgroundColor);
-        setDrawableResourceBackgroundColor(R.drawable.layer_available_day_from,  colorSet.availableDayBackgroundColor);
-        setDrawableResourceBackgroundColor(R.drawable.layer_available_day_to,    colorSet.availableDayBackgroundColor);
-        setDrawableResourceBackgroundColor(R.drawable.layer_available_day_alpha, colorSet.availableDayBackgroundColorAlpha);
-        setDrawableResourceBackgroundColor(R.drawable.layer_clicked_day,         colorSet.clickedDayBackgroundColor);
     }
 
     @Override
@@ -224,6 +217,14 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
      * @since 1.0.0
      */
     private ViewHolder initViewHolder(View view) {
+
+        // リソースの色を設定する。
+        setDrawableResourceBackgroundColor(R.drawable.layer_available_day,       mColorSet.availableDayBackgroundColor);
+        setDrawableResourceBackgroundColor(R.drawable.layer_available_day_from,  mColorSet.availableDayBackgroundColor);
+        setDrawableResourceBackgroundColor(R.drawable.layer_available_day_to,    mColorSet.availableDayBackgroundColor);
+        setDrawableResourceBackgroundColor(R.drawable.layer_available_day_alpha, mColorSet.availableDayBackgroundColorAlpha);
+        setDrawableResourceBackgroundColor(R.drawable.layer_clicked_day,         mColorSet.clickedDayBackgroundColor);
+
         ViewHolder viewHolder = new ViewHolder();
         // 年月テキスト
         viewHolder.monthTextView = (TextView) view.findViewById(R.id.month_text_view);
@@ -359,13 +360,13 @@ public class MonthListAdapter extends BaseAdapter implements View.OnClickListene
 
                                     dayTextView.setBackgroundResource(R.drawable.layer_available_day_alpha);
 
-                                // 開始日、終了日が同日の色をセットする。
+                                    // 開始日、終了日が同日の色をセットする。
                                 } else if ((mAvailableSchedule.selectedFromCalendar.compareTo(targetCalendar) == 0
                                         && mAvailableSchedule.selectedToCalendar.compareTo(targetCalendar) == 0)) {
 
                                     dayTextView.setBackgroundResource(R.drawable.layer_available_day);
 
-                                // 開始日、終了日の色をセットする。
+                                    // 開始日、終了日の色をセットする。
                                 } else {
                                     // 開始日の色をセットする。
                                     if (mAvailableSchedule.selectedFromCalendar.compareTo(targetCalendar) == 0) {
