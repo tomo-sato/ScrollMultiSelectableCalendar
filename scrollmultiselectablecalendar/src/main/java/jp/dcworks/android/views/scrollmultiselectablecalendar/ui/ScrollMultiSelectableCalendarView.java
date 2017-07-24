@@ -1,3 +1,19 @@
+/*
+ * Copyright (C) 2017 tomo-sato
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 package jp.dcworks.android.views.scrollmultiselectablecalendar.ui;
 
 import android.content.Context;
@@ -25,7 +41,19 @@ import jp.dcworks.android.views.scrollmultiselectablecalendar.ui.list.MonthListA
  * ScrollMultiSelectableCalendarViewメイン処理クラス。
  * <p>iOS ZBJCalendarの再現を目的としたCalendarView。
  *
- * @see "https://github.com/wanggang316/ZBJCalendar"
+ * @see <a href="https://github.com/wanggang316/ZBJCalendar">https://github.com/wanggang316/ZBJCalendar</a>
+ *
+ * @attr ref android.R.styleable#LinearLayout_monthTextColor
+ * @attr ref android.R.styleable#LinearLayout_dayTextColor
+ * @attr ref android.R.styleable#LinearLayout_dayWeekendTextColor
+ * @attr ref android.R.styleable#LinearLayout_daySundayTextColor
+ * @attr ref android.R.styleable#LinearLayout_availableDayBackgroundColor
+ * @attr ref android.R.styleable#LinearLayout_availableDayBackgroundColorAlpha
+ * @attr ref android.R.styleable#LinearLayout_availableDayTextColor
+ * @attr ref android.R.styleable#LinearLayout_clickedDayBackgroundColor
+ * @attr ref android.R.styleable#LinearLayout_clickedDayTextColor
+ * @attr ref android.R.styleable#LinearLayout_disableDayTextColor
+ *
  * @author tomo-sato
  * @since 1.0.0
  */
